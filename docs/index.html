@@ -4,64 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Stock Market Algorithm Analyzer</title>
-<style>
-:root{--bg:#fff;--fg:#1d2733;--muted:#5a6675;--accent:#1f6feb;--card:#f4f6f9}
-@media (prefers-color-scheme:dark){:root{--bg:#10151c;--fg:#e6ebf1;--muted:#9aa7b6;--accent:#58a6ff;--card:#18202a}}
-body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 system-ui,sans-serif}
-main,header{max-width:860px;margin:0 auto;padding:0 16px}
-header{padding-top:48px;padding-bottom:16px}
-h1{font-size:2rem;margin:0 0 8px}h2{margin-top:36px}
-.lead{color:var(--muted);font-size:1.1rem}
-nav a{margin-right:12px;color:var(--accent)}
-a{color:var(--accent)}
-table{border-collapse:collapse;width:100%}th,td{border-bottom:1px solid var(--card);padding:8px;text-align:left}
-.card{background:var(--card);padding:12px 16px;border-radius:8px}
-footer{max-width:860px;margin:48px auto;padding:0 16px;color:var(--muted)}
-</style>
+<style>body{font-family:system-ui,sans-serif;max-width:700px;margin:40px auto;padding:0 16px;line-height:1.6}</style>
 </head>
 <body>
-<header>
 <h1>Stock Market Algorithm Analyzer</h1>
-<p class="lead">How fast can we find the best time to buy and sell in millions of rows of real stock prices? We implement and benchmark three algorithms to find out.</p>
-<nav><a href="#problem">Problem</a><a href="#dataset">Dataset</a><a href="#algorithms">Algorithms</a><a href="#results">Results</a><a href="#team">Team</a><a href="#resources">Resources</a></nav>
-</header>
-<main>
-<h2 id="problem">The Problem</h2>
-<p>Given daily prices, which contiguous window of days gives the largest total gain (the maximum subarray problem), and which days had the biggest moves (Top-K)? A slow method works on a year of data but fails on millions of rows. This is algorithm analysis, not price prediction.</p>
-
-<h2 id="dataset">Dataset</h2>
-<p><a href="https://www.kaggle.com/datasets/jacksaleeby/s-and-p500-historical-data">S&amp;P 500 OHLCV Stock Data</a> from Kaggle: about 2.7 million daily rows for roughly 470 companies (2000 to 2026).</p>
-
-<h2 id="solution">Our Solution</h2>
-<p>A Python command-line tool and benchmark suite that runs each algorithm on the same data and reports the answer and the runtime. <em>Demo coming soon.</em></p>
-
-<h2 id="algorithms">Algorithms and Complexity</h2>
-<table>
-<tr><th>Role</th><th>Algorithm</th><th>Time</th><th>Space</th></tr>
-<tr><td>Baseline</td><td>Brute-force max subarray</td><td>O(n²)</td><td>O(1)</td></tr>
-<tr><td>Efficient</td><td>Divide and conquer</td><td>O(n log n)</td><td>O(log n)</td></tr>
-<tr><td>Optimized</td><td>Kadane's algorithm</td><td>O(n)</td><td>O(1)</td></tr>
-<tr><td>Top-K</td><td>Full sort vs. min-heap</td><td>O(n log n) vs. O(n log k)</td><td>-</td></tr>
-</table>
-
-<h2 id="results">Results</h2>
-<p class="card">In progress. Benchmarks at 1K, 10K, 100K and 1M records will be published here.</p>
-
-<h2 id="tech">Technologies</h2>
-<p>Python, pandas, matplotlib, pytest, Git/GitHub.</p>
-
-<h2 id="team">Team</h2>
-<ul>
-<li>Aashish Joshi (group leader)</li>
-<li>Aron Dardouri</li>
-<li>Bhartendra Kumar Mandal</li>
-<li>Brian Lucero</li>
-</ul>
-<p>Individual contributions are listed in <a href="https://github.com/aashish000000/CPS3440-Stock-Algorithm-Analyzer/blob/main/CONTRIBUTIONS.md">CONTRIBUTIONS.md</a>.</p>
-
-<h2 id="resources">Resources</h2>
-<ul><li><a href="https://github.com/aashish000000/CPS3440-Stock-Algorithm-Analyzer">Source code on GitHub</a></li><li>Technical paper: coming soon</li><li>Presentation: coming soon</li></ul>
-</main>
-<footer>CPS 3440 Analysis of Algorithms, Fall 2026</footer>
+<p>CPS 3440 group project: comparing algorithms for finding the best buy/sell window and the top movers in real S&amp;P 500 data.</p>
+<p>Team: Aashish Joshi, Aron Dardouri, Bhartendra Kumar Mandal, Brian Lucero</p>
+<p><a href="https://github.com/aashish000000/CPS3440-Stock-Algorithm-Analyzer">GitHub repository</a></p>
 </body>
 </html>
