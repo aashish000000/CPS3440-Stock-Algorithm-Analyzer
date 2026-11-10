@@ -1,4 +1,9 @@
-"""Time the algorithms on S&P 500 records and count the work they do.
+"""Time the algorithms on the downloaded Kaggle S&P 500 CSV and count the work they do.
+
+The default file is data/SP500_Historical_Data.csv from
+jacksaleeby/s-and-p500-historical-data (original name SP500_Historical_Data.csv).
+That is the file the benchmark measures. The Yahoo Finance fetcher is an
+optional fallback and is not used here.
 
 Wall-clock trials use the production functions. A second metric, operation
 count, is exact: inner-loop iterations for the maximum-subarray scans, and
@@ -151,8 +156,13 @@ def _peak_bytes(function, argument) -> int:
     return peak
 
 
-def load_market_records(path: Path) -> tuple[list[int], list[Scored]]:
-    """Daily changes, then one scored record per day-to-day move."""
+def load_market_records(path: Path) -> tuple[list[int], list[Scored], dict]:
+    """Daily changes and scored moves from the downloaded Kaggle CSV.
+
+    The summary is taken from the file that was read: row count, ticker
+    count, and date range. The default path is the Kaggle export, not a
+    Yahoo Finance refetch.
+    """
 
     book = load_csv(path)
     changes: list[int] = []
@@ -170,18 +180,45 @@ def load_market_records(path: Path) -> tuple[list[int], list[Scored]]:
         raise ValueError(
             f"{path} has {len(changes)} changes and {len(moves)} moves; need at least {SIZES[-1]}"
         )
-    return changes, moves
+    dates = [day for series in book.values() for day in series.dates]
+    summary = {
+        "path": path.as_posix(),
+        "filename": path.name,
+        "original_filename": "SP500_Historical_Data.csv",
+        "kaggle_dataset": "jacksaleeby/s-and-p500-historical-data",
+        "kaggle_url": "https://www.kaggle.com/datasets/jacksaleeby/s-and-p500-historical-data",
+        "columns": ["Ticker", "Date", "Open", "High", "Low", "Close", "Adj Close", "Volume"],
+        "rows": sum(len(series.dates) for series in book.values()),
+        "tickers": len(book),
+        "date_min": min(dates).isoformat(),
+        "date_max": max(dates).isoformat(),
+        "source": "downloaded Kaggle CSV",
+    }
+    return changes, moves, summary
 
 
-def _quadratic_prediction(measured: dict[int, float]) -> dict[str, float]:
-    anchor = max(measured)
-    constant = measured[anchor] / (anchor * anchor)
-    predicted = {}
-    for size in SIZES:
-        if size in measured:
-            continue
-        predicted[str(size)] = constant * size * size
-    return {"anchor_n": anchor, "seconds_per_n_squared": constant, "predicted_ms": {key: value * 1000 for key, value in predicted.items()}}
+def _quadratic_prediction(measured_ms: dict[int, float]) -> dict[str, float]:
+    """Project untimed sizes from the largest measured median.
+
+    The caller stores milliseconds. An earlier version treated those
+    milliseconds as seconds and multiplied by 1,000 again, which inflated
+    the 100,000- and 1,000,000-record projections by 1000. The constant
+    below is milliseconds per n², and predicted_ms is in milliseconds.
+    """
+
+    anchor = max(measured_ms)
+    ms_per_n_squared = measured_ms[anchor] / (anchor * anchor)
+    predicted_ms = {
+        str(size): ms_per_n_squared * size * size
+        for size in SIZES
+        if size not in measured_ms
+    }
+    return {
+        "anchor_n": anchor,
+        "ms_per_n_squared": ms_per_n_squared,
+        "seconds_per_n_squared": ms_per_n_squared / 1000.0,
+        "predicted_ms": predicted_ms,
+    }
 
 
 def run_max_subarray(changes: list[int], trials: int) -> dict:
@@ -304,15 +341,25 @@ def write_figures(results: dict, directory: Path) -> list[str]:
             style,
             label=name.replace("_", " "),
         )
-    predicted = series("brute_force", "median_ms", predicted=True)
-    axis.plot(
-        [size for size, value in zip(sizes, predicted) if value is not None],
-        [value for value in predicted if value is not None],
-        "o--",
-        color="tab:blue",
-        alpha=0.7,
-        label="brute force predicted",
-    )
+    brute_rows = results["max_subarray"]["algorithms"]["brute_force"]
+    predicted_sizes = []
+    predicted_times = []
+    for size in sizes:
+        row = brute_rows[str(size)]
+        if row.get("executed"):
+            anchor = (size, row["median_ms"])
+        elif row.get("predicted_median_ms") is not None:
+            predicted_sizes.append(size)
+            predicted_times.append(row["predicted_median_ms"])
+    if predicted_sizes:
+        axis.plot(
+            [anchor[0], *predicted_sizes],
+            [anchor[1], *predicted_times],
+            "o--",
+            color="tab:blue",
+            alpha=0.75,
+            label="brute force predicted",
+        )
     axis.set_xscale("log")
     axis.set_yscale("log")
     axis.set_xlabel("Records from the S&P 500 file")
@@ -374,6 +421,7 @@ def write_figures(results: dict, directory: Path) -> list[str]:
     axis.bar([position - width / 2 for position in positions], best, width, label="best case (top K first)")
     axis.bar([position + width / 2 for position in positions], worst, width, label="worst case (every insert)")
     axis.set_xticks(positions, [f"{size:,}" for size in sizes])
+    axis.set_yscale("log")
     axis.set_ylabel("Median runtime (ms)")
     axis.set_title("Heap Top-K: best case versus worst case")
     axis.legend(fontsize=8)
@@ -398,16 +446,27 @@ def build_results(changes: list[int], moves: list[Scored], trials: int, k: int) 
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Benchmark the stock algorithms on the S&P 500 file.")
-    parser.add_argument("--data", type=Path, default=Path("data/SP500_Historical_Data.csv"))
+    parser = argparse.ArgumentParser(description="Benchmark the downloaded Kaggle S&P 500 CSV.")
+    parser.add_argument(
+        "--data",
+        type=Path,
+        default=Path("data/SP500_Historical_Data.csv"),
+        help="Downloaded Kaggle CSV (default: data/SP500_Historical_Data.csv from jacksaleeby/s-and-p500-historical-data)",
+    )
     parser.add_argument("--out", type=Path, default=Path("benchmarks/results.json"))
     parser.add_argument("--figures", type=Path, default=Path("docs/assets"))
     parser.add_argument("--trials", type=int, default=DEFAULT_TRIALS)
     parser.add_argument("--k", type=int, default=DEFAULT_K)
     args = parser.parse_args(argv)
-    changes, moves = load_market_records(args.data)
+    changes, moves, dataset = load_market_records(args.data)
+    print(
+        f"loaded {dataset['rows']} rows, {dataset['tickers']} tickers, "
+        f"{dataset['date_min']} through {dataset['date_max']}",
+        flush=True,
+    )
     print(f"loaded {len(changes)} changes and {len(moves)} moves", flush=True)
     results = build_results(changes, moves, args.trials, args.k)
+    results["dataset"] = dataset
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(results, indent=2) + "\n", encoding="utf-8")
     figures = write_figures(results, args.figures)

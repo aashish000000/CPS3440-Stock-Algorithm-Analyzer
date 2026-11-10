@@ -1,6 +1,6 @@
 # Algorithms
 
-Two problems are solved on the Kaggle-style S&P 500 file. Daily adjusted-close changes are integers in micro-dollars. A contiguous sum is the profit of one buy and one later sell. Top-K ranks records by an integer score, then by name.
+Two problems are solved on the downloaded Kaggle CSV `SP500_Historical_Data.csv` (jacksaleeby/s-and-p500-historical-data). Daily adjusted-close changes are integers in micro-dollars. A contiguous sum is the profit of one buy and one later sell. Top-K ranks records by an integer score, then by name.
 
 An empty maximum subarray means every window loses money, so the best action is to stay out. Ties keep the earliest window. Top-K ties keep the alphabetically earlier name. Those rules are why the implementations can be checked against each other exactly.
 

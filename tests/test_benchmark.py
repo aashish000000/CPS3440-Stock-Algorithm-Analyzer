@@ -2,6 +2,7 @@ import random
 import unittest
 
 from analyzer.benchmark import (
+    _quadratic_prediction,
     brute_iterations,
     divide_and_conquer_iterations,
     heap_comparisons,
@@ -38,6 +39,16 @@ class BenchmarkMetricTests(unittest.TestCase):
         self.assertGreater(sort_comparisons(items, 5), 0)
         self.assertGreater(heap_comparisons(items, 5), 0)
         self.assertLess(heap_comparisons(items, 5), sort_comparisons(items, 5) * 2)
+
+    def test_quadratic_projection_stays_in_milliseconds(self) -> None:
+        # 200 ms at n = 10,000. One hundred times as many pairs is 20,000 ms,
+        # not 20,000 seconds. The 1,000,000-record cell is 10,000 times the anchor.
+        predicted = _quadratic_prediction({1_000: 2.0, 10_000: 200.0})
+        self.assertEqual(predicted["anchor_n"], 10_000)
+        self.assertAlmostEqual(predicted["predicted_ms"]["100000"], 20_000.0)
+        self.assertAlmostEqual(predicted["predicted_ms"]["1000000"], 2_000_000.0)
+        self.assertAlmostEqual(predicted["ms_per_n_squared"], 200.0 / 10_000**2)
+        self.assertAlmostEqual(predicted["seconds_per_n_squared"], 200.0 / 10_000**2 / 1000.0)
 
 
 if __name__ == "__main__":

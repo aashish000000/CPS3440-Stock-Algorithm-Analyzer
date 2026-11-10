@@ -26,19 +26,20 @@ Each group is checked against the others. On ties, the earliest window wins, and
 
 ## Run
 
-Python 3.12 from the standard library is enough. Download current S&P 500 history from Yahoo Finance (the same adjusted OHLCV series as the [Kaggle S&P 500 dataset](https://www.kaggle.com/datasets/jacksaleeby/s-and-p500-historical-data)) and compare the algorithms:
+Python 3.12 from the standard library is enough. The measurements were run on the downloaded [Kaggle S&P 500 OHLC file](https://www.kaggle.com/datasets/jacksaleeby/s-and-p500-historical-data). The original filename is `SP500_Historical_Data.csv`. Columns are `Ticker`, `Date`, `Open`, `High`, `Low`, `Close`, `Adj Close`, and `Volume`. The download has 2,703,531 rows, 472 tickers, and dates from 2000-01-03 through 2026-02-20. It is gitignored at `data/SP500_Historical_Data.csv` (about 143 MB).
 
 ```bash
-python3 -m analyzer --fetch data/SP500_Historical_Data.csv --ticker AAPL --k 10 --html docs/results.html
+python3 -m analyzer --ticker AAPL --k 10 --html docs/results.html
+python3 -m analyzer.benchmark
 ```
 
-A Kaggle export with `Ticker`, `Date`, and `Adj Close` columns works the same way:
+Both commands read that Kaggle CSV by default. `--fetch PATH` is an optional Yahoo Finance fallback. It writes a different, shorter history and is not a substitute for the Kaggle file.
 
 ```bash
 python3 -m analyzer data/SP500_Historical_Data.csv --ticker AAPL --k 10
 ```
 
-`--since` and `--until` take `YYYY-MM-DD`. Symbols Yahoo Finance rejects are skipped and listed on stderr. The offline sample is `tests/fixtures/sample.csv`.
+`--since` and `--until` take `YYYY-MM-DD`. The offline sample is `tests/fixtures/sample.csv`.
 
 ```bash
 python3 -m unittest discover -s tests

@@ -78,7 +78,7 @@ def parse_day(value: str) -> date:
 
 
 def load_csv(path: Path) -> dict[str, Series]:
-    """Read a Kaggle-style OHLCV file. Only Ticker, Date, and Adj Close are required."""
+    """Read the downloaded Kaggle OHLCV file. Only Ticker, Date, and Adj Close are required."""
 
     grouped: dict[str, dict[date, int]] = {}
     with path.open(newline="") as handle:

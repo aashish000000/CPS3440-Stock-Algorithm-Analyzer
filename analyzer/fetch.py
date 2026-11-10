@@ -1,8 +1,11 @@
-"""Download S&P 500 history from Yahoo Finance into a Kaggle-compatible CSV.
+"""Optional fallback: download a fresh S&P 500 history from Yahoo Finance.
 
-The Kaggle file named by the project (jacksaleeby/s-and-p500-historical-data)
-is the same Yahoo Finance adjusted OHLCV history. Kaggle requires an account,
-so this fetcher writes that schema directly:
+The project's measurements use the downloaded Kaggle CSV
+jacksaleeby/s-and-p500-historical-data. That file's original name is
+SP500_Historical_Data.csv (Ticker, Date, Open, High, Low, Close, Adj Close,
+Volume; 2,703,531 rows; 472 tickers; 2000-01-03 through 2026-02-20). This
+module does not recreate that file. It writes a shorter current-constituent
+history in a similar column layout when the Kaggle export is unavailable:
 
     Ticker,Date,Open,High,Low,Close,Adj Close,Volume
 """

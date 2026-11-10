@@ -4,7 +4,7 @@ import unittest
 from datetime import date
 from pathlib import Path
 
-from analyzer.__main__ import main
+from analyzer.__main__ import DEFAULT_DATA, _build_parser, main
 from analyzer.fetch import parse_constituent_symbols
 from analyzer.max_subarray import kadane
 from analyzer.prices import daily_changes, holding_return_bps, load_csv, window_bounds
@@ -43,6 +43,15 @@ class PriceTests(unittest.TestCase):
         self.assertIn("Top-K algorithms agree.", text)
         self.assertIn("40.00%", text)
         self.assertIn("50.00%", text)
+
+    def test_cli_defaults_to_the_kaggle_csv(self) -> None:
+        parser = _build_parser()
+        args = parser.parse_args([])
+        self.assertEqual(args.data, DEFAULT_DATA)
+        self.assertEqual(args.data, Path("data/SP500_Historical_Data.csv"))
+        fetch_help = next(action.help for action in parser._actions if action.dest == "fetch")
+        self.assertIn("Optional fallback", fetch_help)
+        self.assertIn("Yahoo", fetch_help)
 
     def test_cli_on_sample(self) -> None:
         buffer = io.StringIO()

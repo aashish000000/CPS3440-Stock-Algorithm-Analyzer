@@ -1,4 +1,10 @@
-"""Command line: python -m analyzer --fetch data/sp500.csv --ticker AAPL --k 10"""
+"""Command line: python -m analyzer --ticker AAPL --k 10
+
+The default CSV is data/SP500_Historical_Data.csv, the file downloaded from
+the Kaggle dataset jacksaleeby/s-and-p500-historical-data (original name
+SP500_Historical_Data.csv). --fetch is an optional Yahoo Finance fallback
+and is not that file.
+"""
 
 from __future__ import annotations
 
@@ -10,16 +16,30 @@ from analyzer.fetch import date_stamp, download_history
 from analyzer.prices import parse_day
 from analyzer.report import analyze, render_text, write_html
 
+# Downloaded Kaggle export. Gitignored because the CSV is about 143 MB.
+DEFAULT_DATA = Path("data/SP500_Historical_Data.csv")
+
 
 def _build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Compare max-subarray and top-K algorithms on S&P 500 prices.")
-    parser.add_argument("data", nargs="?", type=Path, help="OHLCV CSV with Ticker, Date, and Adj Close columns")
-    parser.add_argument("--fetch", type=Path, metavar="PATH", help="Download Yahoo Finance S&P 500 history to this CSV, then analyze it")
+    parser = argparse.ArgumentParser(description="Compare max-subarray and top-K algorithms on the downloaded Kaggle S&P 500 CSV.")
+    parser.add_argument(
+        "data",
+        nargs="?",
+        type=Path,
+        default=DEFAULT_DATA,
+        help="OHLCV CSV with Ticker, Date, and Adj Close columns (default: the downloaded Kaggle file data/SP500_Historical_Data.csv)",
+    )
+    parser.add_argument(
+        "--fetch",
+        type=Path,
+        metavar="PATH",
+        help="Optional fallback: download a fresh Yahoo Finance history to PATH and analyze that file instead of the Kaggle CSV",
+    )
     parser.add_argument("--ticker", default="AAPL", help="Ticker used for the buy/sell window (default: AAPL)")
     parser.add_argument("--k", type=int, default=10, help="How many top movers to list (default: 10)")
     parser.add_argument("--since", help="First date to include, YYYY-MM-DD")
     parser.add_argument("--until", help="Last date to include, YYYY-MM-DD")
-    parser.add_argument("--max-symbols", type=int, help="Download only the first N S&P 500 symbols")
+    parser.add_argument("--max-symbols", type=int, help="With --fetch only: download the first N Wikipedia symbols")
     parser.add_argument("--html", type=Path, help="Also write an HTML results page")
     return parser
 
@@ -31,6 +51,7 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     data = args.data
     if args.fetch is not None:
+        print("Yahoo Finance fallback: this download is not the Kaggle CSV.", flush=True)
         rows, failed = download_history(
             args.fetch,
             date_stamp("2015-01-01"),
@@ -42,8 +63,7 @@ def main(argv: list[str] | None = None) -> int:
             print(f"skipped {message}", file=sys.stderr)
         data = args.fetch
     if data is None:
-        print("Pass a CSV path or --fetch PATH", file=sys.stderr)
-        return 2
+        data = DEFAULT_DATA
     since = parse_day(args.since) if args.since else None
     until = parse_day(args.until) if args.until else None
     if since and until and since > until:
