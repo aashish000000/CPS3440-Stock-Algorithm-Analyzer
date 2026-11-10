@@ -4,16 +4,215 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Stock Market Algorithm Analyzer</title>
-<style>body{font-family:system-ui,sans-serif;max-width:700px;margin:40px auto;padding:0 16px;line-height:1.6}</style>
+<style>
+:root { color-scheme: light; }
+* { box-sizing: border-box; }
+body { margin: 0; font-family: "Source Sans 3", "Segoe UI", sans-serif; color: #1c2430; background: #f6f4ef; line-height: 1.55; }
+header.site { background: #14342b; color: #f6f4ef; padding: 28px 20px 18px; }
+header.site h1 { margin: 0 0 6px; font-family: Georgia, serif; font-weight: 600; font-size: 1.8rem; }
+header.site p { margin: 0; max-width: 760px; }
+nav { position: sticky; top: 0; background: #102820; padding: 8px 12px; z-index: 2; }
+nav a { color: #e7f2ec; text-decoration: none; margin: 4px 9px 4px 0; display: inline-block; font-size: 0.92rem; }
+nav a:hover { text-decoration: underline; }
+main { max-width: 980px; margin: 0 auto; padding: 8px 20px 64px; }
+section { padding-top: 22px; }
+h2 { font-family: Georgia, serif; font-size: 1.55rem; border-bottom: 1px solid #d5d0c6; padding-bottom: 4px; }
+h3 { font-family: Georgia, serif; font-size: 1.15rem; margin-bottom: 6px; }
+table { border-collapse: collapse; width: 100%; margin: 10px 0 18px; background: white; font-size: 0.95rem; }
+th, td { border-bottom: 1px solid #e4dfd4; text-align: left; padding: 6px 8px; vertical-align: top; }
+th { background: #e7efe9; }
+pre { background: #12211c; color: #f3f7f4; padding: 12px 14px; overflow-x: auto; font-size: 0.86rem; line-height: 1.4; }
+code { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+img.figure { width: 100%; max-width: 760px; background: white; border: 1px solid #e4dfd4; }
+img.qr { width: 180px; height: auto; background: white; border: 1px solid #e4dfd4; }
+.note { font-size: 0.92rem; color: #3d4a44; }
+a { color: #0f5c4c; }
+</style>
 </head>
 <body>
-<h1>Stock Market Algorithm Analyzer</h1>
-<p>CPS 3440 group project: comparing algorithms for finding the best buy/sell window and the top movers in real S&amp;P 500 data.</p>
-<p>Team: Aashish Joshi, Aron Dardouri, Bhartendra Kumar Mandal, Brian Lucero</p>
-<p><a href="https://github.com/aashish000000/CPS3440-Stock-Algorithm-Analyzer">GitHub repository</a></p>
+<header class="site">
+<h1>Historical Stock Market Algorithm Analyzer</h1>
+<p>CPS 3440 group project. Three maximum-subarray algorithms and two Top-K algorithms, measured on the downloaded Kaggle S&amp;P 500 CSV.</p>
+</header>
+<nav>
+<a href="#home">Home</a>
+<a href="#problem">Problem</a>
+<a href="#dataset">Dataset</a>
+<a href="#solution">Solution</a>
+<a href="#algorithms">Algorithms</a>
+<a href="#complexity">Complexity</a>
+<a href="#results">Results</a>
+<a href="#demo">Demo</a>
+<a href="#technologies">Technologies</a>
+<a href="#team">Team</a>
+<a href="#resources">Resources</a>
+</nav>
+<main>
+<section id="home">
+<h2>Home</h2>
+<p>This project asks a trading question with algorithms from an analysis course. Given daily adjusted closes, what single buy and later sell would have made the most money per share, and which records were the largest movers? We answer the first question with brute force, divide and conquer, and Kadane's scan. We answer the second with a full sort and a size-K heap. The command-line tool checks that the algorithms agree. The benchmark then times them at 1,000, 10,000, 100,000, and 1,000,000 records drawn from the market file.</p>
+<p>On Apple, across 6,573 closes from 3 January 2000 through 20 February 2026, every maximum-subarray algorithm returns the same window: buy on 8 October 2002 at $0.20 and sell on 2 December 2025 at $285.92, a profit of $285.72 per share. Among 472 stocks in the downloaded Kaggle file, NVDA has the largest buy-and-hold return, 210,811.11 percent.</p>
+<p>The write-up of pseudocode, proofs, and case-by-case bounds is in <a href="algorithms.md">algorithms.md</a>. The technical paper is <a href="paper.html">paper.html</a> (<a href="paper.pdf">PDF</a>). Slides are in the repository under <code>presentation/</code>.</p>
+<p><img class="qr" src="assets/site-qr.png" alt="QR code for the GitHub Pages site"><br><span class="note">QR code for this site: https://aashish000000.github.io/CPS3440-Stock-Algorithm-Analyzer/</span></p>
+</section>
+<section id="problem">
+<h2>Problem</h2>
+<p>Let the adjusted closes be P[0], P[1], …, P[n]. Define the daily change A[i] = P[i+1] − P[i]. The sum of A[start] through A[end] equals P[end+1] − P[start]. The best buy/sell window is a maximum subarray of A. If every subarray is negative, the best decision is not to trade.</p>
+<p>Top-K takes a list of scored records and returns the K best. The order is higher score first. Equal scores break toward the earlier name, so sort and heap can be compared exactly. In the product run, a record is one stock's buy-and-hold return. In the scaling study, a record is one daily move, because the file has more than a million of those and 472 stocks.</p>
+</section>
+<section id="dataset">
+<h2>Dataset</h2>
+<p>The measurements were run on the downloaded <a href="https://www.kaggle.com/datasets/jacksaleeby/s-and-p500-historical-data">Kaggle S&amp;P 500 OHLC file</a>. The original filename is SP500_Historical_Data.csv. Columns are Ticker, Date, Open, High, Low, Close, Adj Close, and Volume. The file has 2,703,531 rows, 472 tickers, and dates from 2000-01-03 through 2026-02-20. <code>--fetch</code> is an optional Yahoo Finance fallback and was not used for these measurements.</p>
+<p>The benchmark file has 2,703,059 daily changes and 2,703,059 scored daily moves, from those 472 constituents, 3 January 2000 through 20 February 2026. Adjusted close is stored as an integer number of micro-dollars. The algorithms therefore compare identical integers, not rounded floats.</p>
+<p>Prefixes of that pool are the 1K, 10K, 100K, and 1M record inputs. The same prefix is reused for every trial, so the spread across trials is measurement noise rather than a new random draw.</p>
+</section>
+<section id="solution">
+<h2>Solution</h2>
+<p>The program is a standard-library Python package, <code>analyzer</code>. <code>prices.py</code> loads the CSV and turns closes into changes. <code>max_subarray.py</code> holds the three window algorithms. <code>top_k.py</code> holds the sort and the heap. <code>__main__.py</code> is the command-line tool. <code>benchmark.py</code> runs the scaling study.</p>
+<pre><code>python3 -m analyzer data/SP500_Historical_Data.csv --ticker AAPL --k 10
+python3 -m analyzer.benchmark --data data/SP500_Historical_Data.csv</code></pre>
+<p>A correct window is not only the largest sum. It is the earliest such window. All three window routines share that rule, and the unit tests include the CLRS example, all-negative arrays, and random arrays where the three answers must match. Sort and heap are checked the same way, including ties.</p>
+</section>
+<section id="algorithms">
 <h2>Algorithms</h2>
-<p>The best buy/sell window is the maximum subarray of daily adjusted-close changes. Three algorithms solve that problem: brute force (O(n&sup2;)), divide and conquer (O(n log n)), and Kadane's scan (O(n)).</p>
-<p>Top movers ranks stocks by buy-and-hold return. Three algorithms select the top K: a full sort (O(n log n)), a binary heap of size K (O(n log k)), and quickselect (O(n) average).</p>
-<p><a href="results.html">Latest comparison on S&amp;P 500 data</a></p>
+<h3>Brute force, Θ(n²)</h3>
+<pre><code>prefix[0] = 0
+for i in 0..n-1: prefix[i+1] = prefix[i] + A[i]
+for start in 0..n-1:
+    for end in start..n-1:
+        consider prefix[end+1] - prefix[start]</code></pre>
+<p>Every window is scored exactly once. The prefix makes each score O(1), so the double loop is quadratic rather than cubic. Correctness is the claim that the best pair is the best window. Best, average, and worst time are the same because every pair is visited. Extra space is the prefix, Θ(n).</p>
+<h3>Divide and conquer, Θ(n log n)</h3>
+<pre><code>if one element: return it when positive, else no trade
+mid = (low + high) // 2
+return the best of
+    DIVIDE(low, mid),
+    DIVIDE(mid+1, high),
+    best suffix of the left half + best prefix of the right half</code></pre>
+<p>Any optimal window is entirely left of mid, entirely right of mid, or it crosses mid. A crossing window is a left suffix plus a right prefix, and both of those are found with a linear scan. The recurrence T(n) = 2T(n/2) + Θ(n) solves to Θ(n log n) in every case. The call stack is Θ(log n).</p>
+<h3>Kadane, Θ(n)</h3>
+<pre><code>current = 0
+for i in 0..n-1:
+    if current &lt; 0: restart at i
+    current += A[i]
+    keep [start, i] when it is the best positive window so far</code></pre>
+<p>A negative running sum is thrown away because appending it to a later element cannot help. The optimal window itself never contains a point where the sum from its start is negative, or a suffix of that window would be better. One pass is enough. Best, average, and worst time are Θ(n), and extra space is Θ(1). A linear scan is optimal: an unread element can change the answer.</p>
+<h3>Top-K by sorting, and Top-K by a heap</h3>
+<pre><code>SORT: order by score descending, name ascending, and keep K
+HEAP: min-heap of the K weakest survivors
+      push until the heap is full
+      replace the minimum when a better record arrives
+      sort those K at the end</code></pre>
+<p>Sorting is correct because a total order puts the answer in the first K positions. Timsort is Θ(n) on one long run and Θ(n log n) on average and in the worst case. The heap invariant says every rejected record is worse than the current minimum. Its worst case is Θ(n log k), when every arrival enters the heap. Its best case is Θ(n + k log k), when the first K records are already the answer. Extra heap space is Θ(k). The study uses k = 10.</p>
+</section>
+<section id="complexity">
+<h2>Complexity</h2>
+<table>
+<thead><tr><th>Algorithm</th><th>Best time</th><th>Average time</th><th>Worst time</th><th>Extra space</th></tr></thead>
+<tbody>
+<tr><td>Brute-force subarray</td><td>Θ(n²)</td><td>Θ(n²)</td><td>Θ(n²)</td><td>Θ(n)</td></tr>
+<tr><td>Divide and conquer</td><td>Θ(n log n)</td><td>Θ(n log n)</td><td>Θ(n log n)</td><td>Θ(log n)</td></tr>
+<tr><td>Kadane</td><td>Θ(n)</td><td>Θ(n)</td><td>Θ(n)</td><td>Θ(1)</td></tr>
+<tr><td>Top-K sort (Timsort)</td><td>Θ(n)</td><td>Θ(n log n)</td><td>Θ(n log n)</td><td>Θ(n)</td></tr>
+<tr><td>Top-K heap</td><td>Θ(n + k log k)</td><td>Θ(n log k) bound</td><td>Θ(n log k)</td><td>Θ(k)</td></tr>
+</tbody>
+</table>
+<p class="note">The heap's average bound is a safe upper bound. On random scores with a fixed k, most late records lose one comparison against the root and never enter the heap, so the measured curve can sit close to linear. The worst-case input in the benchmark forces an insertion on every record.</p>
+</section>
+<section id="results">
+<h2>Results</h2>
+<p>Each timed cell is the median of 5 trials on the same records. The second line is the operation count: pair iterations for brute force, element reads for divide and conquer, loop iterations for Kadane, and comparisons for Top-K. Brute force is executed through 10,000 records. Larger brute-force times are the n² projection from that 10,000-record median, in milliseconds, and they are labeled projected. They were not measured. At 10,000 records the brute-force median was about 3997 times Kadane's median (17.65 s versus 4.415 ms). The same constant projects brute force to 29.4 min projected at 100,000 records and 49.0 h projected at 1,000,000 records.</p>
+<p>From 1,000 to 10,000 records the measured exponents were 2.47 for brute force (model 2), 1.06 for divide and conquer (model about 1.2), and 1.00 for Kadane (model 1). From 1,000 to 1,000,000 the sort exponent was 1.17 and the heap exponent was 1.00.</p>
+<h3>Maximum subarray</h3>
+<table><thead><tr><th>Algorithm</th><th>1,000</th><th>10,000</th><th>100,000</th><th>1,000,000</th></tr></thead><tbody><tr><td>brute force</td><td>60.184 ms<br>ops 500,500</td><td>17.65 s<br>ops 50,005,000</td><td>29.4 min projected<br>ops 5.000e+09</td><td>49.0 h projected<br>ops 5.000e+11</td></tr><tr><td>divide and conquer</td><td>1.354 ms<br>ops 10,976</td><td>15.562 ms<br>ops 143,616</td><td>162.271 ms<br>ops 1,768,928</td><td>1.77 s<br>ops 20,951,424</td></tr><tr><td>kadane</td><td>0.441 ms<br>ops 1,000</td><td>4.415 ms<br>ops 10,000</td><td>47.903 ms<br>ops 100,000</td><td>451.386 ms<br>ops 1,000,000</td></tr></tbody></table>
+<img class="figure" src="assets/max-subarray-time.png" alt="Log-log plot of maximum-subarray runtime versus number of records">
+<img class="figure" src="assets/max-subarray-ops.png" alt="Log-log plot of maximum-subarray operation counts versus number of records">
+<p class="note">Solid marks were timed. The dashed brute-force line is the projection. The operation plot has no projection: n(n+1)/2 is exact at every size, and the divide-and-conquer count is from a dry recursion that does not depend on the values.</p>
+<h3>Top-10, records in market order</h3>
+<table><thead><tr><th>Algorithm</th><th>1,000</th><th>10,000</th><th>100,000</th><th>1,000,000</th></tr></thead><tbody><tr><td>full sort</td><td>0.190 ms<br>comps 8,568</td><td>3.099 ms<br>comps 119,289</td><td>39.132 ms<br>comps 1,324,615</td><td>595.979 ms<br>comps 13,709,082</td></tr><tr><td>binary heap</td><td>0.172 ms<br>comps 1,185</td><td>1.730 ms<br>comps 10,245</td><td>17.193 ms<br>comps 100,313</td><td>176.620 ms<br>comps 1,000,374</td></tr></tbody></table>
+<img class="figure" src="assets/topk-time.png" alt="Log-log plot of sort and heap runtime on market-ordered records">
+<h3>Heap best case and worst case</h3>
+<p>Best case puts the true top 10 first. Worst case feeds improving scores so every record enters the heap.</p>
+<table>
+<thead><tr><th>Heap input</th><th>1,000</th><th>10,000</th><th>100,000</th><th>1,000,000</th></tr></thead>
+<tbody>
+<tr><td>Best case</td><td>0.170 ms<br>comps 1,009</td><td>1.672 ms<br>comps 10,009</td><td>24.231 ms<br>comps 100,009</td><td>521.392 ms<br>comps 1,000,009</td></tr>
+<tr><td>Random</td><td>0.172 ms<br>comps 1,185</td><td>1.730 ms<br>comps 10,245</td><td>17.193 ms<br>comps 100,313</td><td>176.620 ms<br>comps 1,000,374</td></tr>
+<tr><td>Worst case</td><td>0.377 ms<br>comps 4,365</td><td>4.460 ms<br>comps 43,965</td><td>53.285 ms<br>comps 439,965</td><td>893.913 ms<br>comps 4,399,965</td></tr>
+</tbody>
+</table>
+<img class="figure" src="assets/heap-cases.png" alt="Bar chart comparing best-case and worst-case heap runtime">
+<p>Comparison counts follow the case analysis more cleanly than the clock does. At one million records the best-case heap makes about n comparisons and the worst-case heap makes about 4.4n, because every arrival is inserted. The random-order heap also makes about n comparisons, so it is the easy case in the comparison model. Its wall-clock time is nevertheless the fastest of the three at 100,000 and 1,000,000 records. The best-case and worst-case inputs are permutations produced by sorting Python objects, and scanning those pointers is less local than scanning the array in allocation order. The operation column is the one that confirms best versus worst. The clock column is the one a user would feel, and it should not be described as a pure Θ(n log k) curve on market order.</p>
+<p>On the 472-stock product question the three window algorithms agreed, and sort, heap, and quickselect agreed. That check is separate from the scaling study: Apple has 6,573 closes (6,572 changes) in the Kaggle file, and the ranking has 472 stocks. Quickselect is in the tool and the tests. The required Top-K comparison is sort versus heap, so these tables stop there.</p>
+</section>
+<section id="demo">
+<h2>Demo</h2>
+<p>From the repository root, with Python 3.12:</p>
+<pre><code>python3 -m unittest discover -s tests
+python3 -m analyzer tests/fixtures/sample.csv --ticker AAPL --k 3
+python3 -m analyzer data/SP500_Historical_Data.csv --ticker AAPL --k 10</code></pre>
+<p>The sample fixture is committed, so the tests and the small demo do not need the network. The full run below used the downloaded Kaggle CSV at <code>data/SP500_Historical_Data.csv</code>. <code>--fetch</code> remains an optional Yahoo Finance fallback and does not recreate this file. One run on the Kaggle file printed:</p>
+<pre><code>Source: data/SP500_Historical_Data.csv
+Tickers compared: 472
+Best buy/sell window for AAPL (6573 closes, 2000-01-03 through 2026-02-20)
+  brute_force          O(n^2)           8364.118 ms   buy 2002-10-08 at $0.20, sell 2025-12-02 at $285.92, profit $285.72 per share (142,860.00%)
+  divide_and_conquer   O(n log n)          9.029 ms   buy 2002-10-08 at $0.20, sell 2025-12-02 at $285.92, profit $285.72 per share (142,860.00%)
+  kadane               O(n)                2.487 ms   buy 2002-10-08 at $0.20, sell 2025-12-02 at $285.92, profit $285.72 per share (142,860.00%)
+  Maximum-subarray algorithms agree.
+
+Top 10 movers by buy-and-hold return
+  full_sort            O(n log n)          0.114 ms
+  binary_heap          O(n log k)          0.122 ms
+  quickselect          O(n) average        0.231 ms
+  Top-K algorithms agree.
+   1. NVDA     210,811.11%
+   2. MNST     209,300.00%
+   3. AXON     94,228.26%
+   4. DECK     79,026.66%
+   5. TPL      75,639.39%
+   6. NFLX     65,458.33%
+   7. ODFL     42,748.93%
+   8. TSCO     33,000.00%
+   9. AAPL     31,397.61%
+  10. AVGO     29,079.82%
+</code></pre>
+</section>
+<section id="technologies">
+<h2>Technologies</h2>
+<ul>
+<li>Python 3.12. The analyzer, the tests, and the benchmark timer use the standard library.</li>
+<li>unittest for the agreement tests and the operation-count checks.</li>
+<li>matplotlib for the four figures. It is listed in <code>requirements.txt</code> and is not imported by the trading tool.</li>
+<li>GitHub Pages serves this <code>docs/</code> directory.</li>
+<li>The downloaded Kaggle CSV <code>SP500_Historical_Data.csv</code> for every reported measurement. Yahoo Finance is only the optional <code>--fetch</code> fallback.</li>
+</ul>
+</section>
+<section id="team">
+<h2>Team</h2>
+<table>
+<thead><tr><th>Name</th><th>What to ask this person about</th></tr></thead>
+<tbody>
+<tr><td>Aashish Joshi</td><td><code>prices.py</code> and <code>__main__.py</code>: loading adjusted closes, the micro-dollar representation, and the command-line report.</td></tr>
+<tr><td>Aron Dardouri</td><td>Brute force in <code>max_subarray.py</code> and <code>benchmark.py</code>: the double loop, the trial harness, and why 100K and 1M brute force are projected.</td></tr>
+<tr><td>Bhartendra Kumar Mandal</td><td>Divide and conquer in <code>max_subarray.py</code>: the crossing scan, the recurrence, and the earliest-window tie rule.</td></tr>
+<tr><td>Brian Lucero</td><td><code>top_k.py</code>: the size-K heap, the total order used by the sort, and the best-case versus worst-case heap trials.</td></tr>
+</tbody>
+</table>
+<p>Resume lines for each person are in <a href="../CONTRIBUTIONS.md">CONTRIBUTIONS.md</a> in the repository. The presentation script names the speaker on every slide.</p>
+</section>
+<section id="resources">
+<h2>Resources</h2>
+<ul>
+<li><a href="https://github.com/aashish000000/CPS3440-Stock-Algorithm-Analyzer">GitHub repository</a></li>
+<li><a href="https://aashish000000.github.io/CPS3440-Stock-Algorithm-Analyzer/">This site</a></li>
+<li><a href="https://www.kaggle.com/datasets/jacksaleeby/s-and-p500-historical-data">Kaggle S&amp;P 500 historical data</a></li>
+<li>Cormen, Leiserson, Rivest, and Stein, <em>Introduction to Algorithms</em>, maximum-subarray chapter.</li>
+<li>Bentley, <em>Programming Pearls</em>, the one-pass maximum-subarray scan often credited to Kadane.</li>
+<li>Peters, Timsort, used by Python's <code>sorted</code>.</li>
+<li><a href="https://kean.smartcatalogiq.com/en/2026-2027/undergraduate-catalog/courses/cps-computer-science/3000/cps-3440">CPS 3440 catalog description</a></li>
+<li><a href="paper.html">Technical paper</a> and <a href="algorithms.md">full pseudocode and proofs</a></li>
+</ul>
+</section>
+</main>
 </body>
 </html>
