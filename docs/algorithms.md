@@ -126,25 +126,31 @@ The loop body is constant work and runs once per element. No early exit is used.
 ```
 function TOP-K-SORT(items, k):
     if k ≤ 0: return []
-    sort items by score descending, then by name ascending
-    return the first min(k, length(items)) items
+    return the first min(k, length(items)) items of MERGE-SORT(items)
+
+function MERGE-SORT(items):
+    if length(items) ≤ 1: return a copy of items
+    mid ← floor(length(items) / 2)
+    return MERGE(MERGE-SORT(left half), MERGE-SORT(right half))
 ```
 
-Python's sort is Timsort.
+The sort is merge sort, written in `analyzer/top_k.py`. It does not call the library sort.
 
 ### Correctness
 
-A total order is defined by `(−score, name)`. The first k positions of a sorted list are exactly the k best items under that order. If k is larger than the list, the whole sorted list is returned.
+A total order is defined by `(−score, name)`. Merge sort returns that order: each merge keeps the earlier of the two heads, and an equal key keeps the left half, so the sort is stable. The first k positions are exactly the k best items. If k is larger than the list, the whole sorted list is returned.
 
 ### Complexity
 
+Merge sort splits in half and merges in linear time, so T(n) = 2T(n/2) + Θ(n).
+
 | Case | Time | Extra space |
 | --- | --- | --- |
-| Best | Θ(n) for Timsort on one long run | Θ(n) |
+| Best | Θ(n log n) | Θ(n) |
 | Average | Θ(n log n) | Θ(n) |
 | Worst | Θ(n log n) | Θ(n) |
 
-Random market records do not form one long run, so the average bound is the one the benchmark should follow. The extra space is the temporary storage used by the sort.
+The bound does not improve on an already ordered list. The extra space is the temporary storage used by the merges.
 
 ## 5. Top-K by a size-K heap
 
@@ -182,6 +188,6 @@ The final sort of k items is Θ(k log k) and is absorbed by those bounds when k 
 
 ## What is not claimed
 
-Quickselect is also implemented and checked in the tests. The required comparison is sort versus heap, so the benchmark tables use those two.
+Quickselect is implemented in the same module, checked by the tests, and timed in the benchmark next to merge sort and the heap.
 
-Brute force is timed through 10,000 records. At 100,000 and 1,000,000 records a single trial is hours in this Python implementation. The operation count at those sizes is still exact, `n(n+1)/2`, and the missing runtimes are the n² projection from the largest timed size. Those projected points are drawn dashed and are never described as measurements.
+Brute force is timed through 100,000 records. The 100,000-record cell is one trial. The 1,000,000-record runtime is the n² projection from that measurement. The operation count at every size is still exact, `n(n+1)/2`. The projected point is drawn dashed and is not described as a measurement. On market prefixes the time per pair is data dependent, because a positive window does extra work inside the inner loop. The benchmark also times the same function on zero-mean random integers at 1,000 and 10,000 records.

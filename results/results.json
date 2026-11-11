@@ -1,0 +1,945 @@
+{
+  "trials": 5,
+  "sizes": [
+    1000,
+    10000,
+    100000,
+    1000000
+  ],
+  "brute_force_timed_through": 100000,
+  "brute_force_single_trial_from": 100000,
+  "source_changes": 2703059,
+  "source_moves": 2703059,
+  "environment": {
+    "python": "3.12.3",
+    "implementation": "CPython",
+    "cpu": "Intel(R) Xeon(R) Processor",
+    "platform": "Linux-6.12.113+-x86_64-with-glibc2.39"
+  },
+  "max_subarray": {
+    "algorithms": {
+      "brute_force": {
+        "1000": {
+          "trials": 5,
+          "median_ms": 51.346016000024974,
+          "min_ms": 51.19889599882299,
+          "max_ms": 52.25041000085184,
+          "samples_ms": [
+            51.31846100266557,
+            51.19889599882299,
+            52.25041000085184,
+            51.49796000114293,
+            51.346016000024974
+          ],
+          "operations": 500500,
+          "peak_bytes": 41268,
+          "executed": true,
+          "ns_per_pair": 102.58944255749246
+        },
+        "10000": {
+          "trials": 5,
+          "median_ms": 17665.180641000916,
+          "min_ms": 17197.496714001318,
+          "max_ms": 18377.107230997353,
+          "samples_ms": [
+            18377.107230997353,
+            18056.908460999693,
+            17665.180641000916,
+            17284.00959499777,
+            17197.496714001318
+          ],
+          "operations": 50005000,
+          "peak_bytes": 405652,
+          "executed": true,
+          "ns_per_pair": 353.2682859914192
+        },
+        "100000": {
+          "trials": 1,
+          "median_ms": 2007765.5472559999,
+          "min_ms": 2007765.5472559999,
+          "max_ms": 2007765.5472559999,
+          "samples_ms": [
+            2007765.5472559999
+          ],
+          "peak_bytes": null,
+          "operations": 5000050000,
+          "executed": true,
+          "ns_per_pair": 401.54909396026034
+        },
+        "1000000": {
+          "executed": false,
+          "operations": 500000500000,
+          "reason": "Brute force is measured through n=100000 (1 trial at that size). The 1,000,000-record runtime is the n^2 projection from that measurement.",
+          "predicted_median_ms": 200776554.7256
+        }
+      },
+      "kadane": {
+        "1000": {
+          "trials": 5,
+          "median_ms": 0.37810099820489995,
+          "min_ms": 0.37083099960000254,
+          "max_ms": 0.41373199928784743,
+          "samples_ms": [
+            0.41373199928784743,
+            0.37810099820489995,
+            0.37709400203311816,
+            0.37083099960000254,
+            0.39069899867172353
+          ],
+          "operations": 1000,
+          "peak_bytes": 480,
+          "executed": true
+        },
+        "10000": {
+          "trials": 5,
+          "median_ms": 3.893364999385085,
+          "min_ms": 3.731806998985121,
+          "max_ms": 4.016937000415055,
+          "samples_ms": [
+            4.016937000415055,
+            3.731806998985121,
+            3.9339559989457484,
+            3.893364999385085,
+            3.869077998388093
+          ],
+          "operations": 10000,
+          "peak_bytes": 508,
+          "executed": true
+        },
+        "100000": {
+          "trials": 5,
+          "median_ms": 42.27419100061525,
+          "min_ms": 41.00902199934353,
+          "max_ms": 42.4507400020957,
+          "samples_ms": [
+            42.4507400020957,
+            42.27419100061525,
+            42.32223099825205,
+            41.00902199934353,
+            42.26461599682807
+          ],
+          "operations": 100000,
+          "peak_bytes": 452,
+          "executed": true
+        },
+        "1000000": {
+          "trials": 5,
+          "median_ms": 497.05972199808457,
+          "min_ms": 443.6070230003679,
+          "max_ms": 900.3401269983442,
+          "samples_ms": [
+            443.6070230003679,
+            900.3401269983442,
+            520.3126810010872,
+            497.05972199808457,
+            492.7515380004479
+          ],
+          "operations": 1000000,
+          "peak_bytes": 516,
+          "executed": true
+        }
+      },
+      "divide_and_conquer": {
+        "1000": {
+          "trials": 5,
+          "median_ms": 1.3800010019622277,
+          "min_ms": 1.3225250004325062,
+          "max_ms": 1.4115129997662734,
+          "samples_ms": [
+            1.3470730009430554,
+            1.3800010019622277,
+            1.3944220008852426,
+            1.4115129997662734,
+            1.3225250004325062
+          ],
+          "operations": 10976,
+          "peak_bytes": 2472,
+          "executed": true
+        },
+        "10000": {
+          "trials": 5,
+          "median_ms": 13.838121998560382,
+          "min_ms": 13.615954001579667,
+          "max_ms": 14.767065000341972,
+          "samples_ms": [
+            14.767065000341972,
+            13.661986999068176,
+            13.838121998560382,
+            13.858168000297155,
+            13.615954001579667
+          ],
+          "operations": 143616,
+          "peak_bytes": 3440,
+          "executed": true
+        },
+        "100000": {
+          "trials": 5,
+          "median_ms": 163.04708400275558,
+          "min_ms": 161.0509970014391,
+          "max_ms": 164.27547499915818,
+          "samples_ms": [
+            164.27547499915818,
+            162.4576709982648,
+            161.0509970014391,
+            163.04708400275558,
+            163.33960200063302
+          ],
+          "operations": 1768928,
+          "peak_bytes": 4120,
+          "executed": true
+        },
+        "1000000": {
+          "trials": 5,
+          "median_ms": 2036.7777400024352,
+          "min_ms": 1722.0077759993728,
+          "max_ms": 2131.054248999135,
+          "samples_ms": [
+            2036.7777400024352,
+            2117.1353429999726,
+            2131.054248999135,
+            1794.6210890004295,
+            1722.0077759993728
+          ],
+          "operations": 20951424,
+          "peak_bytes": 4912,
+          "executed": true
+        }
+      }
+    },
+    "agreement": {
+      "1000": {
+        "kadane_equals_divide_and_conquer": true,
+        "brute_force_equals_kadane": true
+      },
+      "10000": {
+        "kadane_equals_divide_and_conquer": true,
+        "brute_force_equals_kadane": true
+      },
+      "100000": {
+        "kadane_equals_divide_and_conquer": true,
+        "brute_force_equals_kadane": true
+      },
+      "1000000": {
+        "kadane_equals_divide_and_conquer": true
+      }
+    },
+    "brute_force_prediction": {
+      "anchor_n": 100000,
+      "ms_per_n_squared": 0.00020077655472559999,
+      "seconds_per_n_squared": 2.007765547256e-07,
+      "predicted_ms": {
+        "1000000": 200776554.7256
+      }
+    }
+  },
+  "top_k": {
+    "k": 10,
+    "algorithms": {
+      "full_sort": {
+        "random": {
+          "1000": {
+            "trials": 5,
+            "median_ms": 4.152260997216217,
+            "min_ms": 4.010202999779722,
+            "max_ms": 4.165301998000359,
+            "samples_ms": [
+              4.158196999924257,
+              4.140681001445046,
+              4.010202999779722,
+              4.165301998000359,
+              4.152260997216217
+            ],
+            "operations": 8691,
+            "peak_bytes": 18080,
+            "executed": true,
+            "agree_with_sort": true
+          },
+          "10000": {
+            "trials": 5,
+            "median_ms": 64.83332700008759,
+            "min_ms": 50.93973700058996,
+            "max_ms": 69.09102799909306,
+            "samples_ms": [
+              50.93973700058996,
+              68.57561200013151,
+              69.09102799909306,
+              64.83332700008759,
+              61.94254100046237
+            ],
+            "operations": 119994,
+            "peak_bytes": 169768,
+            "executed": true,
+            "agree_with_sort": true
+          },
+          "100000": {
+            "trials": 5,
+            "median_ms": 434.52186299691675,
+            "min_ms": 416.54050100260065,
+            "max_ms": 559.5783210010268,
+            "samples_ms": [
+              559.5783210010268,
+              416.54050100260065,
+              456.66466200054856,
+              434.52186299691675,
+              418.6181660006696
+            ],
+            "operations": 1532412,
+            "peak_bytes": 1728064,
+            "executed": true,
+            "agree_with_sort": true
+          },
+          "1000000": {
+            "trials": 5,
+            "median_ms": 5407.549673000176,
+            "min_ms": 5291.387260000192,
+            "max_ms": 5451.538444001926,
+            "samples_ms": [
+              5349.177125001006,
+              5291.387260000192,
+              5407.549673000176,
+              5445.416282000224,
+              5451.538444001926
+            ],
+            "operations": 18638382,
+            "peak_bytes": 16784656,
+            "executed": true,
+            "agree_with_sort": true
+          }
+        },
+        "best_for_heap": {
+          "1000": {
+            "trials": 5,
+            "median_ms": 3.2344309984182473,
+            "min_ms": 3.0758469983993564,
+            "max_ms": 3.2555650032009,
+            "samples_ms": [
+              3.2344309984182473,
+              3.246754000429064,
+              3.2555650032009,
+              3.0758469983993564,
+              3.1384549984068144
+            ],
+            "operations": 4932,
+            "peak_bytes": 20736,
+            "executed": true,
+            "agree_with_sort": true
+          },
+          "10000": {
+            "trials": 5,
+            "median_ms": 32.759958998212824,
+            "min_ms": 24.79952800058527,
+            "max_ms": 39.725516999169486,
+            "samples_ms": [
+              39.725516999169486,
+              37.13419600171619,
+              32.759958998212824,
+              24.79952800058527,
+              28.791813001589617
+            ],
+            "operations": 64608,
+            "peak_bytes": 200904,
+            "executed": true,
+            "agree_with_sort": true
+          },
+          "100000": {
+            "trials": 5,
+            "median_ms": 317.926562998764,
+            "min_ms": 267.1275840002636,
+            "max_ms": 332.5593619993015,
+            "samples_ms": [
+              317.926562998764,
+              302.30577000111225,
+              320.09333899986814,
+              332.5593619993015,
+              267.1275840002636
+            ],
+            "operations": 815024,
+            "peak_bytes": 2001128,
+            "executed": true,
+            "agree_with_sort": true
+          },
+          "1000000": {
+            "trials": 5,
+            "median_ms": 4285.168114001863,
+            "min_ms": 4150.92182099761,
+            "max_ms": 4519.220943999244,
+            "samples_ms": [
+              4285.168114001863,
+              4397.420411001804,
+              4150.92182099761,
+              4255.258185999992,
+              4519.220943999244
+            ],
+            "operations": 9884992,
+            "peak_bytes": 20001296,
+            "executed": true,
+            "agree_with_sort": true
+          }
+        },
+        "worst_for_heap": {
+          "1000": {
+            "trials": 5,
+            "median_ms": 3.3426990012230817,
+            "min_ms": 3.3147520007332787,
+            "max_ms": 3.4413089997542556,
+            "samples_ms": [
+              3.339186001539929,
+              3.4413089997542556,
+              3.3426990012230817,
+              3.3147520007332787,
+              3.4121069984394126
+            ],
+            "operations": 5044,
+            "peak_bytes": 20736,
+            "executed": true,
+            "agree_with_sort": true
+          },
+          "10000": {
+            "trials": 5,
+            "median_ms": 19.085264000750612,
+            "min_ms": 18.097364001732785,
+            "max_ms": 20.563283000228694,
+            "samples_ms": [
+              20.563283000228694,
+              18.097364001732785,
+              18.151072999899043,
+              19.085264000750612,
+              19.834377999359276
+            ],
+            "operations": 69008,
+            "peak_bytes": 200904,
+            "executed": true,
+            "agree_with_sort": true
+          },
+          "100000": {
+            "trials": 5,
+            "median_ms": 244.03187000280013,
+            "min_ms": 235.88677699808613,
+            "max_ms": 245.922382997378,
+            "samples_ms": [
+              235.88677699808613,
+              244.33864000093308,
+              245.922382997378,
+              244.03187000280013,
+              243.55153299984522
+            ],
+            "operations": 853904,
+            "peak_bytes": 2001128,
+            "executed": true,
+            "agree_with_sort": true
+          },
+          "1000000": {
+            "trials": 5,
+            "median_ms": 3822.3024459985027,
+            "min_ms": 3727.83931199956,
+            "max_ms": 3856.280931002402,
+            "samples_ms": [
+              3822.3024459985027,
+              3727.83931199956,
+              3799.914841001737,
+              3833.51273000153,
+              3856.280931002402
+            ],
+            "operations": 10066432,
+            "peak_bytes": 20001296,
+            "executed": true,
+            "agree_with_sort": true
+          }
+        }
+      },
+      "binary_heap": {
+        "random": {
+          "1000": {
+            "trials": 5,
+            "median_ms": 0.3074490014114417,
+            "min_ms": 0.30566699933842756,
+            "max_ms": 0.34291900010430254,
+            "samples_ms": [
+              0.34291900010430254,
+              0.3081560025748331,
+              0.3074490014114417,
+              0.3062310024688486,
+              0.30566699933842756
+            ],
+            "operations": 1178,
+            "peak_bytes": 1344,
+            "executed": true,
+            "agree_with_sort": true
+          },
+          "10000": {
+            "trials": 5,
+            "median_ms": 1.2442279985407367,
+            "min_ms": 1.2059199980285484,
+            "max_ms": 1.3633570015372243,
+            "samples_ms": [
+              1.2963539993506856,
+              1.238802997249877,
+              1.2059199980285484,
+              1.2442279985407367,
+              1.3633570015372243
+            ],
+            "operations": 10237,
+            "peak_bytes": 1136,
+            "executed": true,
+            "agree_with_sort": true
+          },
+          "100000": {
+            "trials": 5,
+            "median_ms": 10.408998001366854,
+            "min_ms": 10.36287199895014,
+            "max_ms": 10.74798700210522,
+            "samples_ms": [
+              10.74798700210522,
+              10.36287199895014,
+              10.408998001366854,
+              10.450614001456415,
+              10.374785997555591
+            ],
+            "operations": 100314,
+            "peak_bytes": 1144,
+            "executed": true,
+            "agree_with_sort": true
+          },
+          "1000000": {
+            "trials": 5,
+            "median_ms": 114.92865800028085,
+            "min_ms": 113.58570000084,
+            "max_ms": 115.9845670008508,
+            "samples_ms": [
+              114.61208399850875,
+              113.58570000084,
+              114.92865800028085,
+              115.1964910022798,
+              115.9845670008508
+            ],
+            "operations": 1000383,
+            "peak_bytes": 1144,
+            "executed": true,
+            "agree_with_sort": true
+          }
+        },
+        "best_for_heap": {
+          "1000": {
+            "trials": 5,
+            "median_ms": 0.2513649997126777,
+            "min_ms": 0.25076699967030436,
+            "max_ms": 0.27069399948231876,
+            "samples_ms": [
+              0.27069399948231876,
+              0.2513649997126777,
+              0.2510619997337926,
+              0.2560909997555427,
+              0.25076699967030436
+            ],
+            "operations": 1009,
+            "peak_bytes": 1264,
+            "executed": true,
+            "agree_with_sort": true
+          },
+          "10000": {
+            "trials": 5,
+            "median_ms": 1.1721900009433739,
+            "min_ms": 1.1403419994167052,
+            "max_ms": 1.25619099708274,
+            "samples_ms": [
+              1.25619099708274,
+              1.1403419994167052,
+              1.1422360003052745,
+              1.1721900009433739,
+              1.2451870024960954
+            ],
+            "operations": 10009,
+            "peak_bytes": 1128,
+            "executed": true,
+            "agree_with_sort": true
+          },
+          "100000": {
+            "trials": 5,
+            "median_ms": 15.583981999952812,
+            "min_ms": 14.71226499779732,
+            "max_ms": 15.874438002356328,
+            "samples_ms": [
+              15.874438002356328,
+              15.488775999983773,
+              15.583981999952812,
+              14.71226499779732,
+              15.68870200208039
+            ],
+            "operations": 100009,
+            "peak_bytes": 1128,
+            "executed": true,
+            "agree_with_sort": true
+          },
+          "1000000": {
+            "trials": 5,
+            "median_ms": 307.03987599918037,
+            "min_ms": 292.88366499895346,
+            "max_ms": 336.1156890023267,
+            "samples_ms": [
+              307.03987599918037,
+              320.278582003084,
+              303.3680579974316,
+              292.88366499895346,
+              336.1156890023267
+            ],
+            "operations": 1000009,
+            "peak_bytes": 1128,
+            "executed": true,
+            "agree_with_sort": true
+          }
+        },
+        "worst_for_heap": {
+          "1000": {
+            "trials": 5,
+            "median_ms": 1.4001540002936963,
+            "min_ms": 1.3673879984708037,
+            "max_ms": 1.4208160027919803,
+            "samples_ms": [
+              1.3673879984708037,
+              1.4208160027919803,
+              1.4001540002936963,
+              1.4049189994693734,
+              1.3686460006283596
+            ],
+            "operations": 6015,
+            "peak_bytes": 1216,
+            "executed": true,
+            "agree_with_sort": true
+          },
+          "10000": {
+            "trials": 5,
+            "median_ms": 8.152389000315452,
+            "min_ms": 7.319317002838943,
+            "max_ms": 8.889560001989594,
+            "samples_ms": [
+              8.152389000315452,
+              8.889560001989594,
+              8.541425999283092,
+              7.4836860003415495,
+              7.319317002838943
+            ],
+            "operations": 60615,
+            "peak_bytes": 1144,
+            "executed": true,
+            "agree_with_sort": true
+          },
+          "100000": {
+            "trials": 5,
+            "median_ms": 83.56493799874443,
+            "min_ms": 78.72074899933068,
+            "max_ms": 92.2945759994036,
+            "samples_ms": [
+              80.2861230004055,
+              78.72074899933068,
+              92.2945759994036,
+              90.18808199834893,
+              83.56493799874443
+            ],
+            "operations": 606615,
+            "peak_bytes": 1144,
+            "executed": true,
+            "agree_with_sort": true
+          },
+          "1000000": {
+            "trials": 5,
+            "median_ms": 1142.3162129976845,
+            "min_ms": 1081.8889469992428,
+            "max_ms": 1181.4638940013538,
+            "samples_ms": [
+              1081.8889469992428,
+              1127.0729169991682,
+              1142.3162129976845,
+              1153.1213169982948,
+              1181.4638940013538
+            ],
+            "operations": 6066615,
+            "peak_bytes": 1144,
+            "executed": true,
+            "agree_with_sort": true
+          }
+        }
+      },
+      "quickselect": {
+        "random": {
+          "1000": {
+            "trials": 5,
+            "median_ms": 0.7562829996459186,
+            "min_ms": 0.7517150006606244,
+            "max_ms": 0.8025659990380518,
+            "samples_ms": [
+              0.8025659990380518,
+              0.7562829996459186,
+              0.7649299986951519,
+              0.7517150006606244,
+              0.7551479975518305
+            ],
+            "operations": 2207,
+            "peak_bytes": 8928,
+            "executed": true,
+            "agree_with_sort": true
+          },
+          "10000": {
+            "trials": 5,
+            "median_ms": 10.474411999894073,
+            "min_ms": 5.912430999160279,
+            "max_ms": 11.554906999663217,
+            "samples_ms": [
+              5.912430999160279,
+              6.016391998855397,
+              10.474411999894073,
+              11.554906999663217,
+              11.371599000995047
+            ],
+            "operations": 30863,
+            "peak_bytes": 80928,
+            "executed": true,
+            "agree_with_sort": true
+          },
+          "100000": {
+            "trials": 5,
+            "median_ms": 33.15028900033212,
+            "min_ms": 31.191946000035387,
+            "max_ms": 35.052396000537556,
+            "samples_ms": [
+              33.24977800002671,
+              33.15028900033212,
+              33.07579000102123,
+              31.191946000035387,
+              35.052396000537556
+            ],
+            "operations": 202972,
+            "peak_bytes": 800928,
+            "executed": true,
+            "agree_with_sort": true
+          },
+          "1000000": {
+            "trials": 5,
+            "median_ms": 340.09923999838065,
+            "min_ms": 331.86141300029703,
+            "max_ms": 350.60261100079515,
+            "samples_ms": [
+              350.60261100079515,
+              340.09923999838065,
+              338.8120679992426,
+              345.4595019975386,
+              331.86141300029703
+            ],
+            "operations": 1925883,
+            "peak_bytes": 8000928,
+            "executed": true,
+            "agree_with_sort": true
+          }
+        },
+        "best_for_heap": {
+          "1000": {
+            "trials": 5,
+            "median_ms": 0.6575199986400548,
+            "min_ms": 0.6358049977279734,
+            "max_ms": 0.6664569991698954,
+            "samples_ms": [
+              0.6566660013049841,
+              0.6358049977279734,
+              0.6575199986400548,
+              0.6646830006502569,
+              0.6664569991698954
+            ],
+            "operations": 2011,
+            "peak_bytes": 8928,
+            "executed": true,
+            "agree_with_sort": true
+          },
+          "10000": {
+            "trials": 5,
+            "median_ms": 8.64478099902044,
+            "min_ms": 6.848705001175404,
+            "max_ms": 8.91429200055427,
+            "samples_ms": [
+              8.675321998453,
+              8.91429200055427,
+              8.64478099902044,
+              6.848705001175404,
+              6.91194200044265
+            ],
+            "operations": 20010,
+            "peak_bytes": 80928,
+            "executed": true,
+            "agree_with_sort": true
+          },
+          "100000": {
+            "trials": 5,
+            "median_ms": 43.924456997046946,
+            "min_ms": 42.62918600215926,
+            "max_ms": 44.44888299985905,
+            "samples_ms": [
+              44.44888299985905,
+              44.28495600222959,
+              43.32223700112081,
+              42.62918600215926,
+              43.924456997046946
+            ],
+            "operations": 200009,
+            "peak_bytes": 800928,
+            "executed": true,
+            "agree_with_sort": true
+          },
+          "1000000": {
+            "trials": 5,
+            "median_ms": 764.7332179985824,
+            "min_ms": 757.3528810025891,
+            "max_ms": 799.0354020002997,
+            "samples_ms": [
+              799.0354020002997,
+              757.3528810025891,
+              778.9216480014147,
+              764.7332179985824,
+              758.809511000436
+            ],
+            "operations": 2000010,
+            "peak_bytes": 8000928,
+            "executed": true,
+            "agree_with_sort": true
+          }
+        },
+        "worst_for_heap": {
+          "1000": {
+            "trials": 5,
+            "median_ms": 1.1905389983439818,
+            "min_ms": 1.1517189996084198,
+            "max_ms": 1.268664997041924,
+            "samples_ms": [
+              1.2454269999579992,
+              1.268664997041924,
+              1.15823200030718,
+              1.1905389983439818,
+              1.1517189996084198
+            ],
+            "operations": 3829,
+            "peak_bytes": 8928,
+            "executed": true,
+            "agree_with_sort": true
+          },
+          "10000": {
+            "trials": 5,
+            "median_ms": 13.36069600074552,
+            "min_ms": 12.889494999399176,
+            "max_ms": 14.302980998763815,
+            "samples_ms": [
+              14.302980998763815,
+              12.889494999399176,
+              13.56424400000833,
+              13.189594999857945,
+              13.36069600074552
+            ],
+            "operations": 38421,
+            "peak_bytes": 80960,
+            "executed": true,
+            "agree_with_sort": true
+          },
+          "100000": {
+            "trials": 5,
+            "median_ms": 83.19726099944091,
+            "min_ms": 81.49202700224123,
+            "max_ms": 84.57403800275642,
+            "samples_ms": [
+              84.37118599977111,
+              84.57403800275642,
+              81.49202700224123,
+              83.19726099944091,
+              83.0551729995932
+            ],
+            "operations": 384359,
+            "peak_bytes": 800960,
+            "executed": true,
+            "agree_with_sort": true
+          },
+          "1000000": {
+            "trials": 5,
+            "median_ms": 1856.4595309981087,
+            "min_ms": 1777.9093089993694,
+            "max_ms": 1903.9012659995933,
+            "samples_ms": [
+              1901.936577000015,
+              1842.765221001173,
+              1856.4595309981087,
+              1777.9093089993694,
+              1903.9012659995933
+            ],
+            "operations": 3843734,
+            "peak_bytes": 8000960,
+            "executed": true,
+            "agree_with_sort": true
+          }
+        }
+      }
+    }
+  },
+  "brute_force_data_dependence": {
+    "market_ns_per_pair": {
+      "1000": 102.58944255749246,
+      "10000": 353.2682859914192,
+      "100000": 401.54909396026034
+    },
+    "zero_mean": {
+      "distribution": "uniform integers from -1000000 to 1000000",
+      "sizes": {
+        "1000": {
+          "trials": 5,
+          "median_ms": 162.11622899936629,
+          "min_ms": 161.0096809999959,
+          "max_ms": 163.7280950017157,
+          "samples_ms": [
+            163.7280950017157,
+            162.9750679967401,
+            161.27095100091537,
+            161.0096809999959,
+            162.11622899936629
+          ],
+          "operations": 500500,
+          "executed": true,
+          "agrees_with_kadane": true,
+          "ns_per_pair": 323.90854944928327
+        },
+        "10000": {
+          "trials": 5,
+          "median_ms": 20183.925237997755,
+          "min_ms": 19704.61553399946,
+          "max_ms": 20483.43267400196,
+          "samples_ms": [
+            19888.654561000294,
+            19704.61553399946,
+            20183.925237997755,
+            20483.43267400196,
+            20229.605542997888
+          ],
+          "operations": 50005000,
+          "executed": true,
+          "agrees_with_kadane": true,
+          "ns_per_pair": 403.6381409458605
+        }
+      }
+    },
+    "explanation": "On the market prefix the time per pair rose from about 103 ns at 1,000 records to 353 ns at 10,000 and 402 ns at 100,000. A positive window allocates a candidate, and a longer prefix of Python integers also leaves cache. The same function on zero-mean uniform integers stayed near 324 ns and 404 ns per pair, so a zero mean does not remove the cost. The pair count is still exactly n(n+1)/2. The 1,000,000-record projection uses the measured 100,000-record trial."
+  },
+  "dataset": {
+    "path": "data/SP500_Historical_Data.csv",
+    "filename": "SP500_Historical_Data.csv",
+    "original_filename": "SP500_Historical_Data.csv",
+    "kaggle_dataset": "jacksaleeby/s-and-p500-historical-data",
+    "kaggle_url": "https://www.kaggle.com/datasets/jacksaleeby/s-and-p500-historical-data",
+    "columns": [
+      "Ticker",
+      "Date",
+      "Open",
+      "High",
+      "Low",
+      "Close",
+      "Adj Close",
+      "Volume"
+    ],
+    "rows": 2703531,
+    "tickers": 472,
+    "date_min": "2000-01-03",
+    "date_max": "2026-02-20",
+    "source": "downloaded Kaggle CSV"
+  }
+}

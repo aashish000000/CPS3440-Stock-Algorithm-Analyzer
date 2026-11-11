@@ -1,4 +1,4 @@
-"""Build the CPS 3440 slide deck from benchmarks/results.json."""
+"""Build the CPS 3440 slide deck from results/results.json."""
 
 from __future__ import annotations
 
@@ -165,7 +165,7 @@ def build() -> Path:
             "2,703,531 rows, 472 tickers, 3 January 2000 through 20 February 2026.",
             f"{moves} daily changes, stored as integer micro-dollars so the three window algorithms compare the same integers.",
             "Scaling inputs are prefixes of 1,000, 10,000, 100,000, and 1,000,000 records from that file.",
-            "python3 -m analyzer reads this CSV by default. --fetch is an optional Yahoo Finance fallback and was not used for the measurements.",
+            "python3 -m analyzer reads this CSV by default. The download steps are in data/README.md.",
         ],
         size=20,
         space=8,
@@ -217,12 +217,11 @@ def build() -> Path:
         12.2,
         5.4,
         [
-            "Each cell is the median of 5 trials of the production function on one fixed prefix.",
+            "Sizes through 10,000 records are the median of 5 trials. Brute force at 100,000 records is one trial.",
             "The second metric is an operation count: pairs, element reads, or comparisons.",
-            "Brute force is executed only through 10,000 records. One trial there is already 17.65 seconds.",
-            f"100,000 records projects to {brute_100k}.",
+            f"The measured 100,000-record brute-force time is {brute_100k}.",
             f"1,000,000 records projects to {brute_1m}.",
-            "Those two times were not measured. The dashed line on the figure is the n² projection. The pair count at those sizes is still exact.",
+            "Only that million-record time is a projection. The dashed line is that projection. The pair count is still exact.",
         ],
         size=20,
         space=8,
@@ -242,13 +241,13 @@ def build() -> Path:
             f"Kadane  {kadane_10k}",
             f"Brute force is about {ratio:,.0f}× Kadane at that size.",
             f"At 1,000,000 changes Kadane takes {kadane_1m}.",
-            f"The brute-force cell there is {brute_1m}, and it was not run.",
+            f"The brute-force cell there is {brute_1m}, and it was not run. The 100,000-record cell, {brute_100k}, was.",
         ],
         size=18,
         space=6,
     )
     slide.shapes.add_picture(str(TIME_FIG), Inches(6.85), Inches(1.35), Inches(6.0), Inches(3.7))
-    add_text(slide, 6.85, 5.15, 6.0, 1.5, "Solid marks were timed. The dashed brute-force segment is the projection from the 10,000-record median.", 14, False, MUTED)
+    add_text(slide, 6.85, 5.15, 6.0, 1.5, "Solid marks were timed, including one brute-force trial at 100,000 records. The dashed segment is the projection to 1,000,000.", 14, False, MUTED)
 
     slide = blank(prs, "Bhartendra Kumar Mandal", 8, total, "Divide and conquer")
     add_bullets(
@@ -297,7 +296,7 @@ def build() -> Path:
         5.5,
         [
             "Both algorithms use one total order: higher score, then earlier name. The tests require the same K names, including ties.",
-            "Timsort is Θ(n) on one long run and Θ(n log n) on average and in the worst case. Extra space is Θ(n).",
+            "The full sort is merge sort: Θ(n log n) in every case, with Θ(n) extra space. It does not become linear on a sorted run.",
             "The heap holds the K weakest-at-the-root survivors. Worst-case time is Θ(n log k). Best-case time is Θ(n + k log k). Extra space is Θ(k).",
             f"Market order, one million daily moves, k = 10:",
             f"Full sort  {site.fmt_ms(sort['median_ms'])}    and    {site.fmt_ops(sort['operations'])} comparisons.",
@@ -321,7 +320,7 @@ def build() -> Path:
             f"Heap, every insert:  {heap_worst['operations']:,}",
             f"Clocks: market {site.fmt_ms(heap['median_ms'])}, prepared best case {site.fmt_ms(heap_best['median_ms'])}, worst case {site.fmt_ms(heap_worst['median_ms'])}.",
             "The prepared arrays are permutations, so the best-case clock is slower than market order. The comparison count is the case split.",
-            "On a sorted run Timsort drops to n − 1 comparisons. At one million records the clock barely moves.",
+            "Merge sort stays Θ(n log n) on a sorted run. The heap's comparison count, not the sort, is the case split.",
         ],
         size=16,
         space=5,
@@ -357,7 +356,7 @@ def build() -> Path:
         5.4,
         [
             "GitHub Pages serves docs/: the tables, the four figures, and the paper.",
-            "Brute force at 100,000 and 1,000,000 records is labeled projected on the site and in the PDF.",
+            "Brute force at 1,000,000 records is labeled projected. The 100,000-record brute-force cell was measured once.",
             "The paper is 10 pages. It includes the efficiency-versus-hardness section and CLO reflections A through D.",
             "Slides and this script live in presentation/. Resume lines are in CONTRIBUTIONS.md.",
             SITE,

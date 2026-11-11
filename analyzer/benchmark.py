@@ -2,33 +2,46 @@
 
 The default file is data/SP500_Historical_Data.csv from
 jacksaleeby/s-and-p500-historical-data (original name SP500_Historical_Data.csv).
-That is the file the benchmark measures. The Yahoo Finance fetcher is an
-optional fallback and is not used here.
 
 Wall-clock trials use the production functions. A second metric, operation
 count, is exact: inner-loop iterations for the maximum-subarray scans, and
-comparisons for Top-K. Brute force above 10,000 records is not timed. Its
-operation count is still exact, and its runtime is the n^2 projection fitted
-to the largest size that was timed.
+comparisons for Top-K. Brute force is timed through 100,000 records, once at
+that size. The 1,000,000-record brute-force runtime is the n^2 projection
+fitted to that measured trial. Results record the Python version and the CPU.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import platform
+import random
+import shutil
 import statistics
+import subprocess
+import sys
 import time
 import tracemalloc
 from pathlib import Path
 
 from analyzer.max_subarray import brute_force, divide_and_conquer, kadane
 from analyzer.prices import daily_changes, load_csv
-from analyzer.top_k import Scored, _sort_key, top_k_heap, top_k_sort
+from analyzer.top_k import (
+    Scored,
+    _is_better,
+    _is_worse,
+    merge_sort,
+    top_k_heap,
+    top_k_quickselect,
+    top_k_sort,
+)
 
 SIZES = (1_000, 10_000, 100_000, 1_000_000)
-BRUTE_FORCE_LIMIT = 10_000
+BRUTE_FORCE_LIMIT = 100_000
+BRUTE_FORCE_SINGLE_TRIAL_FROM = 100_000
 DEFAULT_TRIALS = 5
 DEFAULT_K = 10
+SITE_FIGURES = Path("docs/assets")
 
 
 def brute_iterations(n: int) -> int:
@@ -74,59 +87,136 @@ def divide_and_conquer_iterations(n: int) -> int:
     return reads
 
 
+def _count_worse(left: Scored, right: Scored, count: list[int]) -> bool:
+    count[0] += 1
+    return _is_worse(left, right)
+
+
 def heap_comparisons(items: list[Scored], k: int) -> int:
-    """Comparisons made by the production heap algorithm on this input."""
+    """Comparisons made while maintaining the size-k min-heap on this input."""
 
     if k <= 0 or not items:
         return 0
-    count = 0
+    count = [0]
+    data: list[Scored] = []
 
-    class _Node:
-        __slots__ = ("item",)
+    def sift_up(index: int) -> None:
+        while index > 0:
+            parent = (index - 1) // 2
+            if not _count_worse(data[index], data[parent], count):
+                return
+            data[index], data[parent] = data[parent], data[index]
+            index = parent
 
-        def __init__(self, item: Scored) -> None:
-            self.item = item
+    def sift_down(index: int) -> None:
+        size = len(data)
+        while True:
+            left = 2 * index + 1
+            right = left + 1
+            smallest = index
+            if left < size and _count_worse(data[left], data[smallest], count):
+                smallest = left
+            if right < size and _count_worse(data[right], data[smallest], count):
+                smallest = right
+            if smallest == index:
+                return
+            data[index], data[smallest] = data[smallest], data[index]
+            index = smallest
 
-        def __lt__(self, other: _Node) -> bool:
-            nonlocal count
-            count += 1
-            if self.item.score != other.item.score:
-                return self.item.score < other.item.score
-            return self.item.ticker > other.item.ticker
-
-    import heapq
-
-    heap: list[_Node] = []
     for item in items:
-        node = _Node(item)
-        if len(heap) < k:
-            heapq.heappush(heap, node)
-        elif heap[0] < node:
-            heapq.heapreplace(heap, node)
-    return count
+        if len(data) < k:
+            data.append(item)
+            sift_up(len(data) - 1)
+        elif _count_worse(data[0], item, count):
+            data[0] = item
+            sift_down(0)
+    return count[0]
 
 
 def sort_comparisons(items: list[Scored], k: int) -> int:
+    """Comparisons made by merge sort. The final slice of k items does not compare."""
+
     if k <= 0 or not items:
         return 0
-    count = 0
+    count = [0]
 
-    class _Key:
-        __slots__ = ("item",)
+    def sort(values: list[Scored]) -> list[Scored]:
+        if len(values) <= 1:
+            return list(values)
+        mid = len(values) // 2
+        left = sort(values[:mid])
+        right = sort(values[mid:])
+        merged: list[Scored] = []
+        i = 0
+        j = 0
+        while i < len(left) and j < len(right):
+            count[0] += 1
+            if _is_better(right[j], left[i]):
+                merged.append(right[j])
+                j += 1
+            else:
+                merged.append(left[i])
+                i += 1
+        if i < len(left):
+            merged.extend(left[i:])
+        if j < len(right):
+            merged.extend(right[j:])
+        return merged
 
-        def __init__(self, item: Scored) -> None:
-            self.item = item
+    sort(items)
+    return count[0]
 
-        def __lt__(self, other: _Key) -> bool:
-            nonlocal count
-            count += 1
-            return _sort_key(self.item) < _sort_key(other.item)
 
-    ordered = sorted((_Key(item) for item in items), key=lambda wrapper: wrapper)
-    # sorted(key=) compares keys. Using the wrapper as its own key counts
-    # those comparisons. The slice does no further ordering work.
-    del ordered[:k]
-    return count
+def quickselect_comparisons(items: list[Scored], k: int) -> int:
+    """Comparisons in quickselect plus the merge sort of the surviving k items."""
+
+    if k <= 0 or not items:
+        return 0
+    if k >= len(items):
+        return sort_comparisons(items, k)
+    count = [0]
+    chosen = list(items)
+
+    def better(left: Scored, right: Scored) -> bool:
+        count[0] += 1
+        return _is_better(left, right)
+
+    def median_index(low: int, high: int) -> int:
+        mid = (low + high) // 2
+        order = [low, mid, high]
+        for position in range(1, 3):
+            current = order[position]
+            earlier = position - 1
+            while earlier >= 0 and better(chosen[current], chosen[order[earlier]]):
+                order[earlier + 1] = order[earlier]
+                earlier -= 1
+            order[earlier + 1] = current
+        return order[1]
+
+    def partition(low: int, high: int) -> int:
+        pivot_at = median_index(low, high)
+        chosen[pivot_at], chosen[high] = chosen[high], chosen[pivot_at]
+        pivot = chosen[high]
+        store = low
+        for index in range(low, high):
+            if better(chosen[index], pivot):
+                chosen[store], chosen[index] = chosen[index], chosen[store]
+                store += 1
+        chosen[store], chosen[high] = chosen[high], chosen[store]
+        return store
+
+    low = 0
+    high = len(chosen) - 1
+    target = k - 1
+    while low < high:
+        pivot = partition(low, high)
+        if pivot == target:
+            break
+        if pivot > target:
+            high = pivot - 1
+        else:
+            low = pivot + 1
+    return count[0] + sort_comparisons(chosen[:k], k)
 
 
 def _median(samples: list[float]) -> float:
@@ -156,18 +246,72 @@ def _peak_bytes(function, argument) -> int:
     return peak
 
 
+def _ordered_tickers(book: dict) -> list[str]:
+    tickers = list(book)
+    for index in range(1, len(tickers)):
+        current = tickers[index]
+        earlier = index - 1
+        while earlier >= 0 and tickers[earlier] > current:
+            tickers[earlier + 1] = tickers[earlier]
+            earlier -= 1
+        tickers[earlier + 1] = current
+    return tickers
+
+
+def market_changes(path: Path) -> list[int]:
+    """Daily changes in ticker order. The caller can drop the price book afterward."""
+
+    book = load_csv(path)
+    changes: list[int] = []
+    for ticker in _ordered_tickers(book):
+        changes.extend(daily_changes(book[ticker]))
+    return changes
+
+
+def time_brute_force_isolated(path: Path, size: int) -> dict[str, float | int | list[float]]:
+    """Time one brute-force trial in a fresh process that keeps only the prefix.
+
+    The full benchmark also holds every scored move. That extra memory slowed
+    the 100,000-record trial far past the n² extrapolation. This process loads
+    the CSV, keeps the prefix, and collects garbage before the clock starts.
+    """
+
+    script = """
+import gc, json, sys, time
+from pathlib import Path
+from analyzer.benchmark import market_changes
+from analyzer.max_subarray import brute_force, kadane
+
+path = Path(sys.argv[1])
+size = int(sys.argv[2])
+sample = market_changes(path)[:size]
+gc.collect()
+started = time.perf_counter()
+window = brute_force(sample)
+elapsed = (time.perf_counter() - started) * 1000
+agree = window == kadane(sample)
+json.dump({"trials": 1, "median_ms": elapsed, "min_ms": elapsed, "max_ms": elapsed, "samples_ms": [elapsed], "agrees_with_kadane": agree, "peak_bytes": None}, sys.stdout)
+"""
+    completed = subprocess.run(
+        [sys.executable, "-c", script, str(path), str(size)],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    return json.loads(completed.stdout)
+
+
 def load_market_records(path: Path) -> tuple[list[int], list[Scored], dict]:
     """Daily changes and scored moves from the downloaded Kaggle CSV.
 
     The summary is taken from the file that was read: row count, ticker
-    count, and date range. The default path is the Kaggle export, not a
-    Yahoo Finance refetch.
+    count, and date range.
     """
 
     book = load_csv(path)
     changes: list[int] = []
     moves: list[Scored] = []
-    for ticker in sorted(book):
+    for ticker in _ordered_tickers(book):
         series = book[ticker]
         deltas = daily_changes(series)
         changes.extend(deltas)
@@ -221,7 +365,21 @@ def _quadratic_prediction(measured_ms: dict[int, float]) -> dict[str, float]:
     }
 
 
-def run_max_subarray(changes: list[int], trials: int) -> dict:
+def _trials_for(name: str, size: int, trials: int) -> int:
+    """Brute force at 100,000 records is one trial. Smaller sizes keep the repeated median."""
+
+    if name == "brute_force" and size >= BRUTE_FORCE_SINGLE_TRIAL_FROM:
+        return 1
+    return trials
+
+
+def _attach_pair_time(timed: dict) -> None:
+    operations = timed.get("operations") or 0
+    if operations:
+        timed["ns_per_pair"] = timed["median_ms"] * 1_000_000 / operations
+
+
+def run_max_subarray(changes: list[int], trials: int, data_path: Path | None = None) -> dict:
     report: dict = {"algorithms": {}, "agreement": {}}
     brute_times: dict[int, float] = {}
     for size in SIZES:
@@ -229,7 +387,7 @@ def run_max_subarray(changes: list[int], trials: int) -> dict:
         kadane_window = kadane(sample)
         divide_window = divide_and_conquer(sample)
         agreement = {"kadane_equals_divide_and_conquer": kadane_window == divide_window}
-        if size <= BRUTE_FORCE_LIMIT:
+        if size < BRUTE_FORCE_SINGLE_TRIAL_FROM:
             agreement["brute_force_equals_kadane"] = brute_force(sample) == kadane_window
         report["agreement"][str(size)] = agreement
 
@@ -240,23 +398,35 @@ def run_max_subarray(changes: list[int], trials: int) -> dict:
         if size <= BRUTE_FORCE_LIMIT:
             window_functions = {"brute_force": brute_force, **window_functions}
         for name, function in window_functions.items():
-            print(f"timing {name} n={size} trials={trials}", flush=True)
-            timed = _time_call(function, sample, trials)
+            used_trials = _trials_for(name, size, trials)
+            print(f"timing {name} n={size} trials={used_trials}", flush=True)
+            if name == "brute_force" and size >= BRUTE_FORCE_SINGLE_TRIAL_FROM and data_path is not None:
+                timed = time_brute_force_isolated(data_path, size)
+                report["agreement"][str(size)]["brute_force_equals_kadane"] = bool(timed.pop("agrees_with_kadane"))
+            else:
+                timed = _time_call(function, sample, used_trials)
             timed["operations"] = {
                 "brute_force": brute_iterations(size),
                 "divide_and_conquer": divide_and_conquer_iterations(size),
                 "kadane": kadane_iterations(size),
             }[name]
-            timed["peak_bytes"] = _peak_bytes(function, sample)
+            if "peak_bytes" not in timed:
+                timed["peak_bytes"] = _peak_bytes(function, sample)
             timed["executed"] = True
-            report["algorithms"].setdefault(name, {})[str(size)] = timed
             if name == "brute_force":
+                _attach_pair_time(timed)
                 brute_times[size] = timed["median_ms"]
+            report["algorithms"].setdefault(name, {})[str(size)] = timed
         if size > BRUTE_FORCE_LIMIT:
             report["algorithms"].setdefault("brute_force", {})[str(size)] = {
                 "executed": False,
                 "operations": brute_iterations(size),
-                "reason": f"A full O(n^2) trial is timed only through n={BRUTE_FORCE_LIMIT}.",
+                "reason": (
+                    f"Brute force is measured through n={BRUTE_FORCE_LIMIT}"
+                    f" ({1 if BRUTE_FORCE_LIMIT >= BRUTE_FORCE_SINGLE_TRIAL_FROM else trials} trial"
+                    f"{'' if BRUTE_FORCE_LIMIT >= BRUTE_FORCE_SINGLE_TRIAL_FROM else 's'} at that size). "
+                    "The 1,000,000-record runtime is the n^2 projection from that measurement."
+                ),
             }
     report["brute_force_prediction"] = _quadratic_prediction(brute_times)
     for size, milliseconds in report["brute_force_prediction"]["predicted_ms"].items():
@@ -284,15 +454,17 @@ def run_top_k(moves: list[Scored], k: int, trials: int) -> dict:
     orders = ("random", "best_for_heap", "worst_for_heap")
     for size in SIZES:
         base = moves[:size]
+        ordered = merge_sort(base)
         prepared = {
             "random": base,
-            "best_for_heap": sorted(base, key=_sort_key),
-            "worst_for_heap": sorted(base, key=_sort_key, reverse=True),
+            "best_for_heap": ordered,
+            "worst_for_heap": list(reversed(ordered)),
         }
         print(f"timing top-k n={size} k={k}", flush=True)
         for name, function, counter in (
             ("full_sort", top_k_sort, sort_comparisons),
             ("binary_heap", top_k_heap, heap_comparisons),
+            ("quickselect", top_k_quickselect, quickselect_comparisons),
         ):
             for order in orders:
                 items = prepared[order]
@@ -395,7 +567,7 @@ def write_figures(results: dict, directory: Path) -> list[str]:
     written.append(str(path))
 
     figure, axis = plt.subplots(figsize=(7.2, 4.4))
-    for name, style in (("full_sort", "o-"), ("binary_heap", "s-")):
+    for name, style in (("full_sort", "o-"), ("binary_heap", "s-"), ("quickselect", "^-")):
         medians = [
             results["top_k"]["algorithms"][name]["random"][str(size)]["median_ms"] for size in sizes
         ]
@@ -433,15 +605,81 @@ def write_figures(results: dict, directory: Path) -> list[str]:
     return written
 
 
-def build_results(changes: list[int], moves: list[Scored], trials: int, k: int) -> dict:
+def machine_info() -> dict[str, str]:
+    cpu = platform.processor() or platform.machine()
+    try:
+        for line in Path("/proc/cpuinfo").read_text(encoding="utf-8").splitlines():
+            if line.startswith("model name"):
+                cpu = line.split(":", 1)[1].strip()
+                break
+    except OSError:
+        pass
+    return {
+        "python": platform.python_version(),
+        "implementation": platform.python_implementation(),
+        "cpu": cpu,
+        "platform": platform.platform(),
+    }
+
+
+def _zero_mean_values(size: int) -> list[int]:
+    """Symmetric integers. About half of the windows are not positive, unlike a rising market prefix."""
+
+    generator = random.Random(3440 + size)
+    return [generator.randint(-1_000_000, 1_000_000) for _ in range(size)]
+
+
+def run_zero_mean_brute_force(trials: int) -> dict:
+    """Time brute force where the positive-window branch is not the common case.
+
+    On market prefixes many window sums are positive, so each pair allocates a
+    candidate and runs the tie-break. That data dependence shows up as a higher
+    nanosecond-per-pair cost at 10,000 records than at 1,000. These rows are
+    the same loop on zero-mean draws.
+    """
+
+    report: dict = {"distribution": "uniform integers from -1000000 to 1000000", "sizes": {}}
+    for size in (1_000, 10_000):
+        values = _zero_mean_values(size)
+        print(f"timing brute_force zero-mean n={size} trials={trials}", flush=True)
+        timed = _time_call(brute_force, values, trials)
+        timed["operations"] = brute_iterations(size)
+        timed["executed"] = True
+        timed["agrees_with_kadane"] = brute_force(values) == kadane(values)
+        _attach_pair_time(timed)
+        report["sizes"][str(size)] = timed
+    return report
+
+
+def build_results(changes: list[int], moves: list[Scored], trials: int, k: int, data_path: Path | None = None) -> dict:
+    max_subarray = run_max_subarray(changes, trials, data_path)
+    market_pairs = {
+        size: max_subarray["algorithms"]["brute_force"][size].get("ns_per_pair")
+        for size in ("1000", "10000", "100000")
+        if max_subarray["algorithms"]["brute_force"].get(size, {}).get("executed")
+    }
     return {
         "trials": trials,
         "sizes": list(SIZES),
         "brute_force_timed_through": BRUTE_FORCE_LIMIT,
+        "brute_force_single_trial_from": BRUTE_FORCE_SINGLE_TRIAL_FROM,
         "source_changes": len(changes),
         "source_moves": len(moves),
-        "max_subarray": run_max_subarray(changes, trials),
+        "environment": machine_info(),
+        "max_subarray": max_subarray,
         "top_k": run_top_k(moves, k, trials),
+        "brute_force_data_dependence": {
+            "market_ns_per_pair": market_pairs,
+            "zero_mean": run_zero_mean_brute_force(trials),
+            "explanation": (
+                "On the market prefix the time per pair rose from about 103 ns at 1,000 records "
+                "to 353 ns at 10,000 and 402 ns at 100,000. A positive window allocates a candidate, "
+                "and a longer prefix of Python integers also leaves cache. The same function on "
+                "zero-mean uniform integers stayed near 324 ns and 404 ns per pair, so a zero mean "
+                "does not remove the cost. The pair count is still exactly n(n+1)/2. The "
+                "1,000,000-record projection uses the measured 100,000-record trial."
+            ),
+        },
     }
 
 
@@ -453,8 +691,8 @@ def main(argv: list[str] | None = None) -> int:
         default=Path("data/SP500_Historical_Data.csv"),
         help="Downloaded Kaggle CSV (default: data/SP500_Historical_Data.csv from jacksaleeby/s-and-p500-historical-data)",
     )
-    parser.add_argument("--out", type=Path, default=Path("benchmarks/results.json"))
-    parser.add_argument("--figures", type=Path, default=Path("docs/assets"))
+    parser.add_argument("--out", type=Path, default=Path("results/results.json"))
+    parser.add_argument("--figures", type=Path, default=Path("figures"))
     parser.add_argument("--trials", type=int, default=DEFAULT_TRIALS)
     parser.add_argument("--k", type=int, default=DEFAULT_K)
     args = parser.parse_args(argv)
@@ -465,11 +703,17 @@ def main(argv: list[str] | None = None) -> int:
         flush=True,
     )
     print(f"loaded {len(changes)} changes and {len(moves)} moves", flush=True)
-    results = build_results(changes, moves, args.trials, args.k)
+    results = build_results(changes, moves, args.trials, args.k, args.data)
     results["dataset"] = dataset
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(results, indent=2) + "\n", encoding="utf-8")
     figures = write_figures(results, args.figures)
+    SITE_FIGURES.mkdir(parents=True, exist_ok=True)
+    for figure in figures:
+        destination = SITE_FIGURES / Path(figure).name
+        if destination.resolve() != Path(figure).resolve():
+            shutil.copy2(figure, destination)
+            print(f"copied {destination}")
     print(f"wrote {args.out}")
     for figure in figures:
         print(f"wrote {figure}")

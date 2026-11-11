@@ -1,12 +1,13 @@
 import contextlib
 import io
+import random
+import tempfile
 import unittest
 from datetime import date
 from pathlib import Path
 
 from analyzer.__main__ import DEFAULT_DATA, _build_parser, main
-from analyzer.fetch import parse_constituent_symbols
-from analyzer.max_subarray import kadane
+from analyzer.max_subarray import brute_force, divide_and_conquer, kadane
 from analyzer.prices import daily_changes, holding_return_bps, load_csv, window_bounds
 from analyzer.report import analyze, render_text
 
@@ -49,9 +50,8 @@ class PriceTests(unittest.TestCase):
         args = parser.parse_args([])
         self.assertEqual(args.data, DEFAULT_DATA)
         self.assertEqual(args.data, Path("data/SP500_Historical_Data.csv"))
-        fetch_help = next(action.help for action in parser._actions if action.dest == "fetch")
-        self.assertIn("Optional fallback", fetch_help)
-        self.assertIn("Yahoo", fetch_help)
+        destinations = {action.dest for action in parser._actions}
+        self.assertNotIn("fetch", destinations)
 
     def test_cli_on_sample(self) -> None:
         buffer = io.StringIO()
@@ -63,17 +63,56 @@ class PriceTests(unittest.TestCase):
         self.assertIn("Best buy/sell window for AAPL", page)
         self.assertIn("quickselect", page)
 
-    def test_symbol_parser_stops_at_the_constituents_table(self) -> None:
-        html = """
-        <table id="constituents">
-        <tr><td>BRK.B</td><td>Berkshire</td></tr>
-        <tr><td>AAPL</td><td>Apple</td></tr>
-        <tr><td>not a ticker</td></tr>
-        </table>
-        <table><tr><td>Alphabet Inc.
-        Amazon</td></tr></table>
-        """
-        self.assertEqual(parse_constituent_symbols(html), ["BRK-B", "AAPL"])
+    def test_loader_rejects_a_missing_column(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "missing.csv"
+            path.write_text("Ticker,Date,Close\nAAPL,2020-01-02,10\n", encoding="utf-8")
+            with self.assertRaises(ValueError) as caught:
+                load_csv(path)
+        self.assertIn("Adj Close", str(caught.exception))
+
+    def test_loader_skips_blank_rows(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "blank.csv"
+            path.write_text(
+                "Ticker,Date,Adj Close\n"
+                "AAPL,2020-01-02,10\n"
+                ",,\n"
+                "AAPL,,\n"
+                "AAPL,2020-01-03,12\n",
+                encoding="utf-8",
+            )
+            book = load_csv(path)
+        self.assertEqual(book["AAPL"].dates, (date(2020, 1, 2), date(2020, 1, 3)))
+        self.assertEqual([price // 1_000_000 for price in book["AAPL"].ticks], [10, 12])
+
+    def test_loader_keeps_the_last_price_on_a_duplicate_date(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "duplicate.csv"
+            path.write_text(
+                "Ticker,Date,Adj Close\n"
+                "AAPL,2020-01-02,10\n"
+                "AAPL,2020-01-02,15\n"
+                "AAPL,2020-01-03,12\n",
+                encoding="utf-8",
+            )
+            book = load_csv(path)
+        self.assertEqual(book["AAPL"].dates, (date(2020, 1, 2), date(2020, 1, 3)))
+        self.assertEqual([price // 1_000_000 for price in book["AAPL"].ticks], [15, 12])
+
+    def test_long_random_windows_agree(self) -> None:
+        rng = random.Random(3440)
+        samples = [
+            [0] * 2_000,
+            [rng.choice([-(10**12), 0, 10**12]) for _ in range(2_000)],
+            [rng.randint(-(10**6), 10**6) for _ in range(2_000)],
+            [0],
+            [],
+        ]
+        for values in samples:
+            expected = kadane(values)
+            self.assertEqual(brute_force(values), expected)
+            self.assertEqual(divide_and_conquer(values), expected)
 
 
 if __name__ == "__main__":

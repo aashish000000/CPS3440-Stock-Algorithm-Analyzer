@@ -11,6 +11,7 @@ earliest buy, then the earliest sell.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Callable
 
 
 @dataclass(frozen=True)
@@ -119,7 +120,7 @@ def kadane(values: list[int]) -> Subarray:
     return best
 
 
-ALGORITHMS: dict[str, callable] = {
+ALGORITHMS: dict[str, Callable] = {
     "brute_force": brute_force,
     "divide_and_conquer": divide_and_conquer,
     "kadane": kadane,

@@ -22,7 +22,11 @@ class BenchmarkMetricTests(unittest.TestCase):
         self.assertLess(divide_and_conquer_iterations(1000), 1000 * 20)
 
     def test_divide_and_conquer_count_depends_only_on_length(self) -> None:
-        self.assertEqual(divide_and_conquer_iterations(64), divide_and_conquer_iterations(64))
+        half = divide_and_conquer_iterations(32)
+        whole = divide_and_conquer_iterations(64)
+        # The two halves have the same length, and the crossing scan reads every index once.
+        self.assertEqual(whole, half + half + 64)
+        self.assertNotEqual(whole, half)
         smaller = divide_and_conquer_iterations(32)
         larger = divide_and_conquer_iterations(64)
         self.assertGreater(larger / 64, smaller / 32)
