@@ -1,10 +1,10 @@
 # Contributions
 
-CPS 3440, Kean University. The measurements below are the five-trial medians in `benchmarks/results.json`, run on the downloaded Kaggle file `SP500_Historical_Data.csv` (472 tickers, 3 January 2000 through 20 February 2026, 2,703,059 daily changes). Brute force at 100,000 and 1,000,000 records was not timed. Those two runtimes are the n² projection from the 10,000-record median: 29.4 minutes and 49.0 hours.
+CPS 3440, Kean University. The measurements below are in `results/results.json`, run on the downloaded Kaggle file `SP500_Historical_Data.csv` (472 tickers, 3 January 2000 through 20 February 2026, 2,703,059 daily changes). Brute force is timed through 100,000 records, once at that size. The 1,000,000-record brute-force runtime is the n² projection from that measurement.
 
 ## Aashish Joshi
 
-Responsibilities: `prices.py`, the command-line tool, and the dataset path. Adjusted closes are integer micro-dollars. `python3 -m analyzer` reads the Kaggle CSV by default and reports whether the window algorithms and the Top-K algorithms agree. The optional Yahoo Finance `--fetch` path was not used for the published numbers.
+Responsibilities: `prices.py`, the command-line tool, and the dataset path. Adjusted closes are integer micro-dollars. `python3 -m analyzer` reads the Kaggle CSV by default and reports whether the window algorithms and the Top-K algorithms agree.
 
 Resume bullets:
 
@@ -18,7 +18,7 @@ Responsibilities: the Θ(n²) brute-force maximum subarray and `benchmark.py`. T
 Resume bullets:
 
 - Implemented prefix-sum brute force for the maximum subarray and a five-trial benchmark; at 10,000 S&P 500 changes the median was 17.65 s, about 4,000× Kadane's 4.415 ms, with a measured log-log slope of 2.47.
-- Reported 100,000- and 1,000,000-record brute force as n² projections (29.4 min and 49.0 h) from the 10,000-record median, and kept the exact pair count n(n+1)/2, including 5.000×10¹¹ pairs at n = 1,000,000, in place of the trials that were not run.
+- Timed brute force through 100,000 S&P 500 changes, once at that size (33.5 minutes), and kept the 1,000,000-record runtime as a labeled n² projection (55.8 hours) with the exact pair count n(n+1)/2, including 5.000×10¹¹ pairs at n = 1,000,000.
 
 ## Bhartendra Kumar Mandal
 
@@ -35,5 +35,5 @@ Responsibilities: `top_k.py`. Full sort and the size-K binary heap share one tot
 
 Resume bullets:
 
-- Implemented Top-K by Timsort and by a size-10 binary heap; at 1,000,000 daily moves in market order the heap median was 177 ms with 1,000,374 comparisons, against the sort's 596 ms and 13,709,082 comparisons.
+- Implemented Top-K with merge sort and a hand-written size-10 min-heap (`push`, `replace_root`, `sift_down`), and added quickselect to the benchmark; the three methods return the same names, including ties.
 - Separated heap cases at that size: 1,000,009 comparisons when the top 10 come first, 4,399,965 when every record is inserted (median 894 ms), and documented that the prepared best-case clock (521 ms) is slower than market order because the objects are no longer in allocation order.
