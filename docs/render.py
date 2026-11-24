@@ -327,10 +327,9 @@ python3 -m analyzer data/SP500_Historical_Data.csv --ticker AAPL --k 10</code></
 <table>
 <thead><tr><th>Name</th><th>What to ask this person about</th></tr></thead>
 <tbody>
-<tr><td>Aashish Joshi</td><td><code>prices.py</code> and <code>__main__.py</code>: loading adjusted closes, the micro-dollar representation, and the command-line report.</td></tr>
-<tr><td>Aron Dardouri</td><td>Brute force in <code>max_subarray.py</code> and <code>benchmark.py</code>: the double loop, the trial harness, and why 100K and 1M brute force are projected.</td></tr>
+<tr><td>Aashish Joshi</td><td>Brute force in <code>max_subarray.py</code>: the double loop, the earliest-window tie rule, and why 100K and 1M brute force are projected.</td></tr>
+<tr><td>Aron Dardouri</td><td>Kadane's scan in <code>max_subarray.py</code>: the running-sum reset, the linear bound, and why it is the algorithm to ship.</td></tr>
 <tr><td>Bhartendra Kumar Mandal</td><td>Divide and conquer in <code>max_subarray.py</code>: the crossing scan, the recurrence, and the earliest-window tie rule.</td></tr>
-<tr><td>Brian Lucero</td><td><code>top_k.py</code>: the size-K heap, the total order used by the sort, and the best-case versus worst-case heap trials.</td></tr>
 </tbody>
 </table>
 <p>Resume lines for each person are in <a href="../CONTRIBUTIONS.md">CONTRIBUTIONS.md</a> in the repository. The presentation script names the speaker on every slide.</p>
@@ -373,7 +372,7 @@ def build_paper(results: dict) -> str:
 </head>
 <body>
 <h1>Finding One Trade and the Top Movers:<br>Maximum Subarray and Top-K on S&amp;P 500 History</h1>
-<p class="authors">Aashish Joshi, Aron Dardouri, Bhartendra Kumar Mandal, and Brian Lucero</p>
+<p class="authors">Aashish Joshi, Aron Dardouri, and Bhartendra Kumar Mandal</p>
 <p class="meta">CPS 3440 Analysis of Algorithms, Kean University</p>
 
 <h2>1. Introduction</h2>

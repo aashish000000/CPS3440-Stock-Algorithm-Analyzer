@@ -123,14 +123,14 @@ def build() -> Path:
     prs.slide_height = SLIDE_H
     prs.core_properties.title = "Historical Stock Market Algorithm Analyzer"
     prs.core_properties.subject = "CPS 3440 Analysis of Algorithms"
-    prs.core_properties.author = "Aashish Joshi, Aron Dardouri, Bhartendra Kumar Mandal, Brian Lucero"
+    prs.core_properties.author = "Aashish Joshi, Aron Dardouri, Bhartendra Kumar Mandal"
     total = 13
 
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     fill_background(slide, GREEN)
     add_text(slide, 0.7, 1.45, 12, 1.5, "Historical Stock Market\nAlgorithm Analyzer", 40, True, WHITE, font="Georgia")
     add_text(slide, 0.7, 3.7, 11, 0.8, "Maximum subarray and Top-K on the Kaggle S&P 500 history", 22, False, RGBColor(0xD5, 0xE6, 0xDC))
-    add_text(slide, 0.7, 5.15, 11, 1.1, "Aashish Joshi    Aron Dardouri\nBhartendra Kumar Mandal    Brian Lucero", 20, False, WHITE)
+    add_text(slide, 0.7, 5.15, 11, 1.1, "Aashish Joshi    Aron Dardouri\nBhartendra Kumar Mandal", 20, False, WHITE)
     add_text(slide, 0.7, 6.5, 11, 0.4, "CPS 3440 Analysis of Algorithms  ·  Kean University", 16, False, RGBColor(0xD5, 0xE6, 0xDC))
     slide.notes_slide.notes_text_frame.text = "Aashish Joshi opens. See SPEAKER_SCRIPT.md, slide 1."
 
@@ -190,7 +190,7 @@ def build() -> Path:
         space=10,
     )
 
-    slide = blank(prs, "Aron Dardouri", 5, total, "Brute force examines every window")
+    slide = blank(prs, "Aashish Joshi", 5, total, "Brute force examines every window")
     add_bullets(
         slide,
         0.55,
@@ -228,7 +228,7 @@ def build() -> Path:
         space=8,
     )
 
-    slide = blank(prs, "Aron Dardouri", 7, total, "The window algorithms, on the clock")
+    slide = blank(prs, "Bhartendra Kumar Mandal", 7, total, "The window algorithms, on the clock")
     add_bullets(
         slide,
         0.48,
@@ -269,7 +269,7 @@ def build() -> Path:
         space=7,
     )
 
-    slide = blank(prs, "Bhartendra Kumar Mandal", 9, total, "The clock and the recurrence")
+    slide = blank(prs, "Aron Dardouri", 9, total, "The clock and the recurrence")
     add_bullets(
         slide,
         0.55,
@@ -288,7 +288,7 @@ def build() -> Path:
         space=7,
     )
 
-    slide = blank(prs, "Brian Lucero", 10, total, "Sort versus a size-10 heap")
+    slide = blank(prs, "Aron Dardouri", 10, total, "Sort versus a size-10 heap")
     add_bullets(
         slide,
         0.55,
@@ -307,7 +307,7 @@ def build() -> Path:
         space=7,
     )
 
-    slide = blank(prs, "Brian Lucero", 11, total, "Best case, worst case, and the clock")
+    slide = blank(prs, "Bhartendra Kumar Mandal", 11, total, "Best case, worst case, and the clock")
     add_bullets(
         slide,
         0.45,

@@ -2,7 +2,7 @@
 
 CPS 3440 group project at Kean University. The program finds the best single buy and later sell in a price series, and the top movers in a universe, with several algorithms whose costs are far apart. Every published timing was run on the downloaded Kaggle S&P 500 file.
 
-Team: Aashish Joshi, Aron Dardouri, Bhartendra Kumar Mandal, and Brian Lucero. See `CONTRIBUTIONS.md` for who wrote what.
+Team: Aashish Joshi, Aron Dardouri, and Bhartendra Kumar Mandal. See `CONTRIBUTIONS.md` for who wrote what.
 
 Site: https://aashish000000.github.io/CPS3440-Stock-Algorithm-Analyzer/
 
