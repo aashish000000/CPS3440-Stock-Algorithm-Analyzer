@@ -6,11 +6,14 @@ Team: Aashish Joshi, Aron Dardouri, Bhartendra Kumar Mandal, and Brian Lucero. S
 
 Site: https://aashish000000.github.io/CPS3440-Stock-Algorithm-Analyzer/
 
+Notebook: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/aashish000000/CPS3440-Stock-Algorithm-Analyzer/blob/main/notebooks/Stock_Algorithm_Analyzer.ipynb)
+
 ## Layout
 
 | Path | What it is |
 | --- | --- |
 | `analyzer/` | The library and the command-line tool. Standard library only. |
+| `notebooks/` | Research notebook that runs the whole study. Opens in Google Colab. |
 | `LICENSE` | MIT license. |
 | `results/`, `figures/` | Output folders for regenerated benchmark JSON and charts (see their README files). |
 | `benchmarks/results.json` | Five-trial medians, operation counts, and the brute-force projection. |
