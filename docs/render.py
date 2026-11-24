@@ -327,9 +327,9 @@ python3 -m analyzer data/SP500_Historical_Data.csv --ticker AAPL --k 10</code></
 <table>
 <thead><tr><th>Name</th><th>What to ask this person about</th></tr></thead>
 <tbody>
-<tr><td>Aashish Joshi</td><td>Brute force in <code>max_subarray.py</code>: the double loop, the earliest-window tie rule, and why 100K and 1M brute force are projected.</td></tr>
-<tr><td>Aron Dardouri</td><td>Kadane's scan in <code>max_subarray.py</code>: the running-sum reset, the linear bound, and why it is the algorithm to ship.</td></tr>
-<tr><td>Bhartendra Kumar Mandal</td><td>Divide and conquer in <code>max_subarray.py</code>: the crossing scan, the recurrence, and the earliest-window tie rule.</td></tr>
+<tr><td>Aashish Joshi</td><td>Brute force in <code>max_subarray.py</code>: the double loop, the earliest-window tie rule, and why 100K and 1M brute force are projected. Also the data loading, <code>prices.py</code>, and the command-line report.</td></tr>
+<tr><td>Aron Dardouri</td><td>Kadane's scan in <code>max_subarray.py</code>: the running-sum reset, the linear bound, and why it is the algorithm to ship. Also <code>top_k.py</code>: the size-K heap, the merge sort, and the best-case versus worst-case heap trials.</td></tr>
+<tr><td>Bhartendra Kumar Mandal</td><td>Divide and conquer in <code>max_subarray.py</code>: the crossing scan, the recurrence, and the earliest-window tie rule. Also <code>benchmark.py</code>: the trial harness, the operation counts, and the paper.</td></tr>
 </tbody>
 </table>
 <p>Resume lines for each person are in <a href="../CONTRIBUTIONS.md">CONTRIBUTIONS.md</a> in the repository. The presentation script names the speaker on every slide.</p>
