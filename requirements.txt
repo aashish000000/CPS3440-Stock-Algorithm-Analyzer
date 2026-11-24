@@ -1,0 +1,6 @@
+# The command-line analyzer uses only the Python standard library.
+# These packages reproduce the benchmark figures, the QR code, and the slides.
+matplotlib
+qrcode
+pillow
+python-pptx

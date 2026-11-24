@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Algorithm comparison</title>
+<style>
+body { font-family: system-ui, sans-serif; max-width: 920px; margin: 40px auto; padding: 0 16px; line-height: 1.5; }
+table { border-collapse: collapse; width: 100%; margin: 12px 0 28px; }
+th, td { border-bottom: 1px solid #ddd; text-align: left; padding: 6px 8px; vertical-align: top; }
+td:nth-child(3), th:nth-child(3) { white-space: nowrap; }
+</style>
+</head>
+<body>
+<h1>Algorithm comparison</h1>
+<p>Buy/sell search uses three maximum-subarray algorithms on daily adjusted-close changes. Top movers uses three top-K algorithms on buy-and-hold return. Prices come from data/SP500_Historical_Data.csv (472 tickers).</p>
+<p>Adjusted closes from 2000-01-03 through 2026-02-20.</p>
+<h2>Best buy/sell window for AAPL</h2>
+<p>6573 closing prices. All three algorithms found the same window.</p>
+<table>
+<thead><tr><th>Algorithm</th><th>Complexity</th><th>Runtime</th><th>Result</th></tr></thead>
+<tbody>
+<tr><td>brute_force</td><td>O(n^2)</td><td>8364.118 ms</td><td>buy 2002-10-08 at $0.20, sell 2025-12-02 at $285.92, profit $285.72 per share (142,860.00%)</td></tr><tr><td>divide_and_conquer</td><td>O(n log n)</td><td>9.029 ms</td><td>buy 2002-10-08 at $0.20, sell 2025-12-02 at $285.92, profit $285.72 per share (142,860.00%)</td></tr><tr><td>kadane</td><td>O(n)</td><td>2.487 ms</td><td>buy 2002-10-08 at $0.20, sell 2025-12-02 at $285.92, profit $285.72 per share (142,860.00%)</td></tr>
+</tbody>
+</table>
+<h2>Top 10 movers</h2>
+<p>All three top-K algorithms returned the same ranking.</p>
+<table>
+<thead><tr><th>Algorithm</th><th>Complexity</th><th>Runtime</th></tr></thead>
+<tbody>
+<tr><td>full_sort</td><td>O(n log n)</td><td>0.114 ms</td></tr><tr><td>binary_heap</td><td>O(n log k)</td><td>0.122 ms</td></tr><tr><td>quickselect</td><td>O(n) average</td><td>0.231 ms</td></tr>
+</tbody>
+</table>
+<table>
+<thead><tr><th>Rank</th><th>Ticker</th><th>Buy-and-hold return</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>NVDA</td><td>210,811.11%</td></tr><tr><td>2</td><td>MNST</td><td>209,300.00%</td></tr><tr><td>3</td><td>AXON</td><td>94,228.26%</td></tr><tr><td>4</td><td>DECK</td><td>79,026.66%</td></tr><tr><td>5</td><td>TPL</td><td>75,639.39%</td></tr><tr><td>6</td><td>NFLX</td><td>65,458.33%</td></tr><tr><td>7</td><td>ODFL</td><td>42,748.93%</td></tr><tr><td>8</td><td>TSCO</td><td>33,000.00%</td></tr><tr><td>9</td><td>AAPL</td><td>31,397.61%</td></tr><tr><td>10</td><td>AVGO</td><td>29,079.82%</td></tr>
+</tbody>
+</table>
+<p><a href="index.html">Back to the project page</a></p>
+</body>
+</html>
